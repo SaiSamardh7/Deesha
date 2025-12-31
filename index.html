@@ -1,124 +1,527 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Deesha — Trip Itinerary Builder</title>
+  <title>Deesha — Trip Planner MVP</title>
   <style>
-    :root{--bg:#0b1220;--card:rgba(255,255,255,.06);--border:rgba(255,255,255,.12);--text:#e9eefc;--muted:rgba(233,238,252,.75);--brand:#4f7cff}
+    :root{
+      --bg:#0b1220;--card:rgba(255,255,255,.06);--border:rgba(255,255,255,.12);
+      --text:#e9eefc;--muted:rgba(233,238,252,.72);--brand:#4f7cff;--good:#2dd4bf;
+    }
     *{box-sizing:border-box}
     body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;background:var(--bg);color:var(--text)}
-    .nav{position:sticky;top:0;background:rgba(11,18,32,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:14px 18px;display:flex;justify-content:space-between;align-items:center}
-    .brand{font-weight:900;letter-spacing:.4px}
+    .nav{position:sticky;top:0;background:rgba(11,18,32,.86);backdrop-filter:blur(10px);
+      border-bottom:1px solid var(--border);padding:14px 18px;display:flex;justify-content:space-between;align-items:center}
+    .brand{font-weight:900;letter-spacing:.4px;display:flex;gap:10px;align-items:center}
     .tag{font-size:13px;color:var(--muted)}
-    .wrap{max-width:980px;margin:0 auto;padding:26px 18px 60px}
-    .hero h1{margin:0 0 10px;font-size:34px}
-    .hero p{margin:0 0 20px;color:var(--muted)}
-    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .wrap{max-width:1000px;margin:0 auto;padding:22px 18px 64px}
+    .hero h1{margin:0 0 8px;font-size:32px}
+    .hero p{margin:0 0 16px;color:var(--muted)}
     .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
     label{display:grid;gap:8px;font-size:13px;color:var(--muted)}
     input,select{padding:12px;border-radius:12px;border:1px solid var(--border);background:rgba(0,0,0,.25);color:var(--text);outline:none}
-    button{width:100%;margin-top:14px;padding:12px;border-radius:12px;border:0;background:var(--brand);color:white;font-weight:800;cursor:pointer}
-    button:hover{opacity:.92}
-    .out{margin-top:16px}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .steps{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px}
+    .step{padding:6px 10px;border-radius:999px;border:1px solid var(--border);color:var(--muted);font-size:12px}
+    .step.active{border-color:rgba(79,124,255,.45);background:rgba(79,124,255,.12);color:var(--text)}
+    .chips{display:flex;gap:10px;flex-wrap:wrap}
+    .chip{
+      padding:10px 12px;border-radius:999px;border:1px solid var(--border);
+      background:rgba(255,255,255,.04);color:var(--text);cursor:pointer;user-select:none;font-size:13px
+    }
+    .chip.on{border-color:rgba(45,212,191,.55);background:rgba(45,212,191,.10)}
+    .muted{color:var(--muted);font-size:13px}
+    .actions{display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap;margin-top:14px}
+    button{padding:12px 14px;border-radius:12px;border:0;background:var(--brand);color:white;font-weight:800;cursor:pointer}
+    button.secondary{background:rgba(255,255,255,.08);border:1px solid var(--border);color:var(--text)}
+    button:disabled{opacity:.5;cursor:not-allowed}
+    .list{margin-top:12px;display:grid;gap:10px}
+    .item{padding:12px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid var(--border)}
+    .item h4{margin:0 0 6px;font-size:15px}
+    .pill{padding:6px 10px;border-radius:999px;background:rgba(79,124,255,.15);border:1px solid rgba(79,124,255,.35);color:var(--text);font-size:12px}
     .day{margin:10px 0;padding:12px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid var(--border)}
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;color:var(--muted);font-size:13px}
-    .pill{padding:6px 10px;border-radius:999px;background:rgba(79,124,255,.15);border:1px solid rgba(79,124,255,.35);color:var(--text)}
+    .day h3{margin:0 0 8px;font-size:15px}
     .footer{border-top:1px solid var(--border);padding:16px;text-align:center;color:var(--muted);font-size:13px}
-    @media(max-width:720px){.grid{grid-template-columns:1fr}.hero h1{font-size:28px}}
+    .hide{display:none}
+    @media(max-width:720px){.grid{grid-template-columns:1fr}.hero h1{font-size:26px}}
   </style>
 </head>
 <body>
   <header class="nav">
-    <div class="brand">Deesha</div>
-    <div class="tag">v1.0 • Itinerary Builder</div>
+    <div class="brand">Deesha <span class="pill">MVP</span></div>
+    <div class="tag">Trip Setup → Preferences → Results → Itinerary</div>
   </header>
 
   <main class="wrap">
     <section class="hero">
-      <h1>Plan your trip like a traveler, not a tourist.</h1>
-      <p>Tell Deesha what you want. Get a clean day-by-day itinerary (road trips first).</p>
+      <h1>Plan for the route, not just downtown.</h1>
+      <p>Tell Deesha what you want. We’ll generate stops “on the way” and build a clean itinerary.</p>
     </section>
 
-    <section class="card">
-      <div class="grid">
-        <label>
-          Start City
-          <input id="start" placeholder="e.g., Dallas" />
-        </label>
-        <label>
-          Destination
-          <input id="dest" placeholder="e.g., Denver" />
-        </label>
-        <label>
-          Days
-          <select id="days">
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4" selected>4</option>
-            <option value="5">5</option>
-          </select>
-        </label>
-        <label>
-          Trip Style
-          <select id="style">
-            <option value="adventure" selected>Adventure</option>
-            <option value="hiking">Hiking</option>
-            <option value="scenic">Scenic</option>
-            <option value="relaxed">Relaxed</option>
-          </select>
-        </label>
+    <div class="card">
+      <div class="steps">
+        <div class="step" id="s1">1) Trip Setup</div>
+        <div class="step" id="s2">2) Preferences</div>
+        <div class="step" id="s3">3) Results</div>
+        <div class="step" id="s4">4) Itinerary</div>
       </div>
 
-      <button id="btn">Build Itinerary</button>
+      <!-- STEP 1 -->
+      <section id="step1">
+        <div class="grid">
+          <label>
+            Start city (or current location)
+            <input id="startCity" placeholder="e.g., Dallas" />
+          </label>
+          <label>
+            Destination
+            <input id="destCity" placeholder="e.g., Denver" />
+          </label>
+          <label>
+            Dates / number of days
+            <select id="days">
+              <option value="2">2 days</option>
+              <option value="3">3 days</option>
+              <option value="4" selected>4 days</option>
+              <option value="5">5 days</option>
+              <option value="6">6 days</option>
+            </select>
+          </label>
+          <label>
+            Travel mode
+            <select id="mode">
+              <option value="car" selected>Car</option>
+              <option value="flight+car">Flight + Car</option>
+            </select>
+          </label>
+          <label>
+            Daily drive limit
+            <select id="driveLimit">
+              <option value="3">~3 hrs/day</option>
+              <option value="5" selected>~5 hrs/day</option>
+              <option value="7">~7 hrs/day</option>
+              <option value="9">~9 hrs/day</option>
+            </select>
+          </label>
+          <label>
+            Route corridor (miles from route)
+            <select id="corridor">
+              <option value="10">10 miles (tight)</option>
+              <option value="20" selected>20 miles (balanced)</option>
+              <option value="30">30 miles (wide)</option>
+            </select>
+          </label>
+        </div>
 
-      <div id="out" class="out"></div>
-    </section>
+        <div class="actions">
+          <button class="secondary" disabled>Back</button>
+          <button id="toStep2">Next → Preferences</button>
+        </div>
+      </section>
+
+      <!-- STEP 2 -->
+      <section id="step2" class="hide">
+        <h3 style="margin:0 0 10px;">What do you want to do?</h3>
+        <div class="chips" id="activityChips"></div>
+        <p class="muted" style="margin:10px 0 16px;">Select multiple. We’ll rank results based on your choices.</p>
+
+        <h3 style="margin:0 0 10px;">Constraints</h3>
+        <div class="grid">
+          <label>
+            Budget
+            <select id="budget">
+              <option value="low">Low</option>
+              <option value="mid" selected>Mid</option>
+              <option value="high">High</option>
+            </select>
+          </label>
+          <label>
+            Fitness (for hikes)
+            <select id="fitness">
+              <option value="easy" selected>Easy</option>
+              <option value="moderate">Moderate</option>
+              <option value="hard">Hard</option>
+            </select>
+          </label>
+          <label>
+            Traveling with
+            <select id="withWhom">
+              <option value="solo" selected>Solo</option>
+              <option value="couple">Couple</option>
+              <option value="friends">Friends</option>
+              <option value="family">Family</option>
+            </select>
+          </label>
+          <label>
+            Food preference
+            <select id="foodPref">
+              <option value="any" selected>Any</option>
+              <option value="veg">Vegetarian</option>
+              <option value="nonveg">Non-veg</option>
+            </select>
+          </label>
+          <label>
+            Kid-friendly?
+            <select id="kid">
+              <option value="no" selected>No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </label>
+          <label>
+            Alcohol?
+            <select id="alcohol">
+              <option value="no" selected>No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </label>
+          <label>
+            Avoid crowds?
+            <select id="avoidCrowds">
+              <option value="no" selected>No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </label>
+          <label>
+            Avoid toll roads?
+            <select id="avoidTolls">
+              <option value="no" selected>No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </label>
+          <label>
+            Avoid long hikes?
+            <select id="avoidLongHikes">
+              <option value="no" selected>No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </label>
+          <label>
+            Avoid risky activities?
+            <select id="avoidRisky">
+              <option value="no" selected>No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="actions">
+          <button class="secondary" id="back1">← Back</button>
+          <button id="toStep3">Next → Results</button>
+        </div>
+      </section>
+
+      <!-- STEP 3 -->
+      <section id="step3" class="hide">
+        <div class="row" style="justify-content:space-between;">
+          <h3 style="margin:0;">Stops on your route</h3>
+          <span class="pill" id="rankInfo">ranking…</span>
+        </div>
+        <p class="muted" style="margin:8px 0 12px;">
+          (MVP) These are mock results generated using your preferences + corridor distance.
+          Next version will plug in Google/Map APIs.
+        </p>
+
+        <div class="list" id="resultsList"></div>
+
+        <div class="actions">
+          <button class="secondary" id="back2">← Back</button>
+          <button id="toStep4">Build Itinerary →</button>
+        </div>
+      </section>
+
+      <!-- STEP 4 -->
+      <section id="step4" class="hide">
+        <div class="row" style="justify-content:space-between;">
+          <h3 style="margin:0;">Your itinerary</h3>
+          <div class="row">
+            <button class="secondary" id="download">Download</button>
+          </div>
+        </div>
+        <p class="muted" style="margin:8px 0 12px;">Morning / Afternoon / Evening blocks + drive time buffer.</p>
+
+        <div id="itineraryOut"></div>
+
+        <div class="actions">
+          <button class="secondary" id="back3">← Back</button>
+          <button id="startOver">Start Over</button>
+        </div>
+      </section>
+    </div>
   </main>
 
-  <footer class="footer">Deesha © 2025 • Built on GitHub Pages</footer>
+  <footer class="footer">Deesha © 2025 • v1.0 MVP on GitHub Pages</footer>
 
   <script>
-    const tips = {
-      adventure: ["One big thrill activity", "Local iconic food stop", "Sunset viewpoint"],
-      hiking: ["Pick a trail (2–6 miles)", "Water + early start", "Golden-hour photos"],
-      scenic: ["Scenic byway/route", "2 photo stops", "Short walk + lookout"],
-      relaxed: ["Late start brunch", "1–2 easy spots", "More rest time"]
+    // ---------- State ----------
+    const state = {
+      step: 1,
+      trip: {},
+      prefs: { activities: new Set() },
+      results: [],
+      itinerary: []
     };
 
-    document.getElementById("btn").addEventListener("click", () => {
-      const start = (document.getElementById("start").value || "Start City").trim();
-      const dest  = (document.getElementById("dest").value  || "Destination").trim();
-      const days  = parseInt(document.getElementById("days").value, 10);
-      const style = document.getElementById("style").value;
+    const ACTIVITIES = [
+      { key:"adventure", label:"Adventure (zipline/ATV/rafting)" },
+      { key:"hiking", label:"Hiking (easy/moderate/hard)" },
+      { key:"scenic", label:"Scenic views (sunrise/sunset)" },
+      { key:"hidden", label:"Hidden gems (offbeat)" },
+      { key:"food", label:"Food (must-try/cafes)" },
+      { key:"nature", label:"Nature (lakes/waterfalls/deserts)" },
+      { key:"photo", label:"Photography spots" },
+      { key:"nightlife", label:"Nightlife / events" },
+      { key:"relax", label:"Relax (spas/beaches)" }
+    ];
 
-      const plan = [];
-      for (let d = 1; d <= days; d++) {
-        const focus = tips[style];
-        plan.push(`
-          <div class="day">
-            <div class="row">
-              <span class="pill">Day ${d}</span>
-              <span>${d === 1 ? `${start} → ${dest}` : `Around ${dest}`}</span>
-            </div>
-            <ul>
-              <li>${focus[0]}</li>
-              <li>${focus[1]}</li>
-              <li>${focus[2]}</li>
-            </ul>
-          </div>
-        `);
+    // Mock “database” of stops (v1.0)
+    const STOP_DB = [
+      { name:"Scenic Overlook", tags:["scenic","photo"], baseRating:4.7, minutesOffRoute:18 },
+      { name:"Hidden Waterfall Trail", tags:["nature","hiking","hidden","photo"], baseRating:4.6, minutesOffRoute:25 },
+      { name:"Local BBQ Legend", tags:["food"], baseRating:4.8, minutesOffRoute:12 },
+      { name:"Sunset Ridge Point", tags:["scenic","photo"], baseRating:4.5, minutesOffRoute:10 },
+      { name:"River Rafting Spot", tags:["adventure","nature"], baseRating:4.4, minutesOffRoute:28 },
+      { name:"Downtown Night Market", tags:["nightlife","food"], baseRating:4.3, minutesOffRoute:22 },
+      { name:"Quiet Lake Picnic", tags:["relax","nature"], baseRating:4.5, minutesOffRoute:16 },
+      { name:"Offbeat Ghost Town", tags:["hidden","photo"], baseRating:4.2, minutesOffRoute:30 },
+      { name:"Easy Canyon Walk", tags:["hiking","scenic"], baseRating:4.4, minutesOffRoute:14 },
+      { name:"Spa & Hot Springs", tags:["relax"], baseRating:4.6, minutesOffRoute:26 },
+    ];
+
+    // ---------- UI Helpers ----------
+    const $ = (id) => document.getElementById(id);
+    const stepsEls = {1:$("s1"),2:$("s2"),3:$("s3"),4:$("s4")};
+    const sections = {1:$("step1"),2:$("step2"),3:$("step3"),4:$("step4")};
+
+    function setStep(n){
+      state.step = n;
+      for (const k of [1,2,3,4]){
+        stepsEls[k].classList.toggle("active", k===n);
+        sections[k].classList.toggle("hide", k!==n);
       }
+      window.scrollTo({top:0,behavior:"smooth"});
+    }
 
-      document.getElementById("out").innerHTML = `
-        <h3 style="margin:10px 0 6px;">Your ${days}-day itinerary</h3>
-        <div class="row" style="margin-bottom:10px;">
-          <span class="pill">${style}</span>
-          <span><b>${start}</b> → <b>${dest}</b></span>
+    // ---------- Step 2: Chips ----------
+    function renderChips(){
+      const wrap = $("activityChips");
+      wrap.innerHTML = "";
+      ACTIVITIES.forEach(a=>{
+        const div = document.createElement("div");
+        div.className = "chip" + (state.prefs.activities.has(a.key) ? " on" : "");
+        div.textContent = a.label;
+        div.onclick = () => {
+          if (state.prefs.activities.has(a.key)) state.prefs.activities.delete(a.key);
+          else state.prefs.activities.add(a.key);
+          renderChips();
+        };
+        wrap.appendChild(div);
+      });
+    }
+
+    // ---------- Scoring / Ranking (MVP) ----------
+    function buildResults(){
+      const corridorMiles = parseInt($("corridor").value, 10);
+      const avoidCrowds = $("avoidCrowds").value === "yes";
+      const avoidRisky = $("avoidRisky").value === "yes";
+      const fitness = $("fitness").value;
+      const selected = Array.from(state.prefs.activities);
+
+      // Filter by corridor (rough mock: minutesOffRoute correlates with miles)
+      const maxMinutes = corridorMiles; // simple mapping for MVP (10→10, 20→20, 30→30)
+      let items = STOP_DB.filter(s => s.minutesOffRoute <= maxMinutes);
+
+      // Basic “constraints” behavior (mock)
+      if (avoidRisky) items = items.filter(s => !s.tags.includes("adventure"));
+      if (fitness === "easy") items = items.filter(s => !(s.name.includes("Trail") && s.tags.includes("hiking")));
+      if (avoidCrowds) items = items.filter(s => !s.name.includes("Downtown"));
+
+      // Score: preference match + rating + distance penalty
+      items = items.map(s=>{
+        const match = selected.reduce((acc,tag)=> acc + (s.tags.includes(tag)? 1:0), 0);
+        const distancePenalty = s.minutesOffRoute / 40; // 0..~0.75
+        const score = (match * 2.2) + (s.baseRating * 1.0) - distancePenalty;
+        return {...s, match, score: Number(score.toFixed(2))};
+      }).sort((a,b)=> b.score - a.score);
+
+      state.results = items.slice(0, 8);
+      $("rankInfo").textContent = `Top ${state.results.length} ranked`;
+      renderResults();
+    }
+
+    function renderResults(){
+      const list = $("resultsList");
+      list.innerHTML = "";
+      if (!state.results.length){
+        list.innerHTML = `<div class="item"><h4>No stops found</h4><div class="muted">Try increasing corridor miles or removing avoids.</div></div>`;
+        return;
+      }
+      state.results.forEach((r,i)=>{
+        const el = document.createElement("div");
+        el.className = "item";
+        el.innerHTML = `
+          <div class="row" style="justify-content:space-between;">
+            <h4>${i+1}. ${r.name}</h4>
+            <span class="pill">Score ${r.score}</span>
+          </div>
+          <div class="row">
+            <span class="muted">Tags:</span>
+            ${r.tags.map(t=>`<span class="pill">${t}</span>`).join("")}
+          </div>
+          <div class="muted" style="margin-top:6px;">
+            Rating: ${r.baseRating} • ~${r.minutesOffRoute} min off-route
+          </div>
+        `;
+        list.appendChild(el);
+      });
+    }
+
+    // ---------- Itinerary Builder (MVP) ----------
+    function buildItinerary(){
+      const days = parseInt($("days").value,10);
+      const start = ($("startCity").value || "Start City").trim();
+      const dest  = ($("destCity").value || "Destination").trim();
+      const driveLimit = parseInt($("driveLimit").value,10);
+      const picks = state.results;
+
+      const blocks = [];
+      let idx = 0;
+      for (let d=1; d<=days; d++){
+        const morning = picks[idx++ % picks.length];
+        const afternoon = picks[idx++ % picks.length];
+        const evening = picks[idx++ % picks.length];
+
+        blocks.push({
+          day: d,
+          route: d===1 ? `${start} → ${dest}` : `Around ${dest}`,
+          morning: morning?.name || "Explore nearby spot",
+          afternoon: afternoon?.name || "Local food + short activity",
+          evening: evening?.name || "Sunset viewpoint / relax",
+          notes: `Drive buffer: ~${driveLimit} hrs/day. Keep 30–60 min slack.`
+        });
+      }
+      state.itinerary = blocks;
+      renderItinerary();
+    }
+
+    function renderItinerary(){
+      const out = $("itineraryOut");
+      const start = ($("startCity").value || "Start City").trim();
+      const dest  = ($("destCity").value || "Destination").trim();
+      const style = Array.from(state.prefs.activities).join(", ") || "not selected";
+
+      out.innerHTML = `
+        <div class="item">
+          <div class="row" style="justify-content:space-between;">
+            <h4 style="margin:0;">Trip: <b>${start}</b> → <b>${dest}</b></h4>
+            <span class="pill">${style}</span>
+          </div>
+          <div class="muted" style="margin-top:6px;">
+            Mode: ${$("mode").value} • Corridor: ${$("corridor").value} miles • Budget: ${$("budget").value}
+          </div>
         </div>
-        ${plan.join("")}
       `;
-    });
+
+      state.itinerary.forEach(d=>{
+        const el = document.createElement("div");
+        el.className = "day";
+        el.innerHTML = `
+          <h3>Day ${d.day} <span class="pill" style="margin-left:8px;">${d.route}</span></h3>
+          <ul>
+            <li><b>Morning:</b> ${d.morning}</li>
+            <li><b>Afternoon:</b> ${d.afternoon}</li>
+            <li><b>Evening:</b> ${d.evening}</li>
+          </ul>
+          <div class="muted">${d.notes}</div>
+        `;
+        out.appendChild(el);
+      });
+    }
+
+    // ---------- Download (JSON) ----------
+    function downloadJSON(){
+      const payload = {
+        trip: {
+          startCity: $("startCity").value || "",
+          destCity: $("destCity").value || "",
+          days: $("days").value,
+          mode: $("mode").value,
+          driveLimit: $("driveLimit").value,
+          corridor: $("corridor").value
+        },
+        preferences: {
+          activities: Array.from(state.prefs.activities),
+          budget: $("budget").value,
+          fitness: $("fitness").value,
+          withWhom: $("withWhom").value,
+          foodPref: $("foodPref").value,
+          kidFriendly: $("kid").value,
+          alcohol: $("alcohol").value,
+          avoid: {
+            crowds: $("avoidCrowds").value,
+            tolls: $("avoidTolls").value,
+            longHikes: $("avoidLongHikes").value,
+            risky: $("avoidRisky").value
+          }
+        },
+        results: state.results,
+        itinerary: state.itinerary
+      };
+      const blob = new Blob([JSON.stringify(payload,null,2)], {type:"application/json"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "deesha-itinerary.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // ---------- Wiring ----------
+    renderChips();
+    setStep(1);
+
+    $("toStep2").onclick = () => {
+      // minimal validation
+      const start = $("startCity").value.trim();
+      const dest  = $("destCity").value.trim();
+      if (!start || !dest){
+        alert("Please enter Start city and Destination.");
+        return;
+      }
+      setStep(2);
+    };
+
+    $("back1").onclick = () => setStep(1);
+
+    $("toStep3").onclick = () => {
+      // allow empty activities, but better UX nudges
+      buildResults();
+      setStep(3);
+    };
+
+    $("back2").onclick = () => setStep(2);
+
+    $("toStep4").onclick = () => {
+      if (!state.results.length) buildResults();
+      buildItinerary();
+      setStep(4);
+    };
+
+    $("back3").onclick = () => setStep(3);
+
+    $("download").onclick = downloadJSON;
+
+    $("startOver").onclick = () => {
+      // reset
+      state.prefs.activities = new Set();
+      state.results = [];
+      state.itinerary = [];
+      renderChips();
+      setStep(1);
+      $("resultsList").innerHTML = "";
+      $("itineraryOut").innerHTML = "";
+    };
   </script>
 </body>
 </html>
