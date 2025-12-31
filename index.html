@@ -1,45 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Deesha — Trip Itinerary Builder</title>
   <style>
-    body{margin:0;font-family:Arial;background:#0b1220;color:#fff;display:grid;place-items:center;height:100vh;text-align:center;padding:24px}
-    .card{max-width:700px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:22px}
-    button{margin-top:14px;padding:10px 14px;border-radius:12px;border:0;background:#4f7cff;color:#fff;font-weight:700;cursor:pointer}
-    input{padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.25);color:#fff;margin:6px;width:220px}
+    :root{--bg:#0b1220;--card:rgba(255,255,255,.06);--border:rgba(255,255,255,.12);--text:#e9eefc;--muted:rgba(233,238,252,.75);--brand:#4f7cff}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;background:var(--bg);color:var(--text)}
+    .nav{position:sticky;top:0;background:rgba(11,18,32,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:14px 18px;display:flex;justify-content:space-between;align-items:center}
+    .brand{font-weight:900;letter-spacing:.4px}
+    .tag{font-size:13px;color:var(--muted)}
+    .wrap{max-width:980px;margin:0 auto;padding:26px 18px 60px}
+    .hero h1{margin:0 0 10px;font-size:34px}
+    .hero p{margin:0 0 20px;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px}
+    label{display:grid;gap:8px;font-size:13px;color:var(--muted)}
+    input,select{padding:12px;border-radius:12px;border:1px solid var(--border);background:rgba(0,0,0,.25);color:var(--text);outline:none}
+    button{width:100%;margin-top:14px;padding:12px;border-radius:12px;border:0;background:var(--brand);color:white;font-weight:800;cursor:pointer}
+    button:hover{opacity:.92}
+    .out{margin-top:16px}
+    .day{margin:10px 0;padding:12px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid var(--border)}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;color:var(--muted);font-size:13px}
+    .pill{padding:6px 10px;border-radius:999px;background:rgba(79,124,255,.15);border:1px solid rgba(79,124,255,.35);color:var(--text)}
+    .footer{border-top:1px solid var(--border);padding:16px;text-align:center;color:var(--muted);font-size:13px}
+    @media(max-width:720px){.grid{grid-template-columns:1fr}.hero h1{font-size:28px}}
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Deesha 🌍</h1>
-    <p>AI-based travel planner (v1.0): generates a simple day-by-day itinerary.</p>
+  <header class="nav">
+    <div class="brand">Deesha</div>
+    <div class="tag">v1.0 • Itinerary Builder</div>
+  </header>
 
-    <div>
-      <input id="from" placeholder="Start city (e.g., Dallas)" />
-      <input id="to" placeholder="Destination (e.g., Denver)" />
-    </div>
-    <button onclick="build()">Build Itinerary</button>
+  <main class="wrap">
+    <section class="hero">
+      <h1>Plan your trip like a traveler, not a tourist.</h1>
+      <p>Tell Deesha what you want. Get a clean day-by-day itinerary (road trips first).</p>
+    </section>
 
-    <div id="out" style="margin-top:16px;text-align:left;"></div>
-  </div>
+    <section class="card">
+      <div class="grid">
+        <label>
+          Start City
+          <input id="start" placeholder="e.g., Dallas" />
+        </label>
+        <label>
+          Destination
+          <input id="dest" placeholder="e.g., Denver" />
+        </label>
+        <label>
+          Days
+          <select id="days">
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4" selected>4</option>
+            <option value="5">5</option>
+          </select>
+        </label>
+        <label>
+          Trip Style
+          <select id="style">
+            <option value="adventure" selected>Adventure</option>
+            <option value="hiking">Hiking</option>
+            <option value="scenic">Scenic</option>
+            <option value="relaxed">Relaxed</option>
+          </select>
+        </label>
+      </div>
+
+      <button id="btn">Build Itinerary</button>
+
+      <div id="out" class="out"></div>
+    </section>
+  </main>
+
+  <footer class="footer">Deesha © 2025 • Built on GitHub Pages</footer>
 
   <script>
-    function build(){
-      const from = document.getElementById('from').value || 'Start City';
-      const to = document.getElementById('to').value || 'Destination';
-      document.getElementById('out').innerHTML = `
-        <h3>Your 4-day itinerary</h3>
-        <p><b>${from}</b> → <b>${to}</b></p>
-        <ol>
-          <li><b>Day 1:</b> Drive + 1 scenic stop + local food</li>
-          <li><b>Day 2:</b> Adventure activity + viewpoint</li>
-          <li><b>Day 3:</b> Hiking trail + hidden spot outside downtown</li>
-          <li><b>Day 4:</b> Chill morning + return</li>
-        </ol>
+    const tips = {
+      adventure: ["One big thrill activity", "Local iconic food stop", "Sunset viewpoint"],
+      hiking: ["Pick a trail (2–6 miles)", "Water + early start", "Golden-hour photos"],
+      scenic: ["Scenic byway/route", "2 photo stops", "Short walk + lookout"],
+      relaxed: ["Late start brunch", "1–2 easy spots", "More rest time"]
+    };
+
+    document.getElementById("btn").addEventListener("click", () => {
+      const start = (document.getElementById("start").value || "Start City").trim();
+      const dest  = (document.getElementById("dest").value  || "Destination").trim();
+      const days  = parseInt(document.getElementById("days").value, 10);
+      const style = document.getElementById("style").value;
+
+      const plan = [];
+      for (let d = 1; d <= days; d++) {
+        const focus = tips[style];
+        plan.push(`
+          <div class="day">
+            <div class="row">
+              <span class="pill">Day ${d}</span>
+              <span>${d === 1 ? `${start} → ${dest}` : `Around ${dest}`}</span>
+            </div>
+            <ul>
+              <li>${focus[0]}</li>
+              <li>${focus[1]}</li>
+              <li>${focus[2]}</li>
+            </ul>
+          </div>
+        `);
+      }
+
+      document.getElementById("out").innerHTML = `
+        <h3 style="margin:10px 0 6px;">Your ${days}-day itinerary</h3>
+        <div class="row" style="margin-bottom:10px;">
+          <span class="pill">${style}</span>
+          <span><b>${start}</b> → <b>${dest}</b></span>
+        </div>
+        ${plan.join("")}
       `;
-    }
+    });
   </script>
 </body>
 </html>
