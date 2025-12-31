@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deesha — Trip Itinerary Builder</title>
+  <style>
+    body{margin:0;font-family:Arial;background:#0b1220;color:#fff;display:grid;place-items:center;height:100vh;text-align:center;padding:24px}
+    .card{max-width:700px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:22px}
+    button{margin-top:14px;padding:10px 14px;border-radius:12px;border:0;background:#4f7cff;color:#fff;font-weight:700;cursor:pointer}
+    input{padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.25);color:#fff;margin:6px;width:220px}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Deesha 🌍</h1>
+    <p>AI-based travel planner (v1.0): generates a simple day-by-day itinerary.</p>
+
+    <div>
+      <input id="from" placeholder="Start city (e.g., Dallas)" />
+      <input id="to" placeholder="Destination (e.g., Denver)" />
+    </div>
+    <button onclick="build()">Build Itinerary</button>
+
+    <div id="out" style="margin-top:16px;text-align:left;"></div>
+  </div>
+
+  <script>
+    function build(){
+      const from = document.getElementById('from').value || 'Start City';
+      const to = document.getElementById('to').value || 'Destination';
+      document.getElementById('out').innerHTML = `
+        <h3>Your 4-day itinerary</h3>
+        <p><b>${from}</b> → <b>${to}</b></p>
+        <ol>
+          <li><b>Day 1:</b> Drive + 1 scenic stop + local food</li>
+          <li><b>Day 2:</b> Adventure activity + viewpoint</li>
+          <li><b>Day 3:</b> Hiking trail + hidden spot outside downtown</li>
+          <li><b>Day 4:</b> Chill morning + return</li>
+        </ol>
+      `;
+    }
+  </script>
+</body>
+</html>
