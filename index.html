@@ -31,8 +31,8 @@
 
   /* Outer container: Stage 1 centered */
   .shell{
-    width: min(980px, 95vw); /* wider teal/glow container */
-    padding: clamp(20px, 3.4vw, 36px); /* slightly more breathing room */
+    width: min(980px, 95vw);
+    padding: clamp(20px, 3.4vw, 36px);
     border-radius: 28px;
     background: linear-gradient(180deg, rgba(210,240,255,0.75), rgba(255,255,255,0.55));
     box-shadow: var(--shadow);
@@ -45,7 +45,6 @@
     height: auto;
     min-height: unset;
 
-    /* IMPORTANT: don't clip borders/shadows when Stage 2 opens */
     overflow: visible;
 
     transition: width 0.6s ease, padding 0.6s ease, box-shadow 0.6s ease, background 0.6s ease;
@@ -53,7 +52,17 @@
 
   /* Stage 2 layout */
   .shell.stage2{
-    width: min(1280px, 96vw); /* wider teal/glow container on stage2 */
+    width: min(1280px, 96vw);
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    gap: 28px;
+    padding: clamp(16px, 2.6vw, 24px);
+  }
+
+  /* Stage 3 layout */
+  .shell.stage3{
+    width: min(1280px, 96vw);
     display:flex;
     align-items:flex-start;
     justify-content:center;
@@ -73,8 +82,9 @@
     transition: width 0.6s ease, transform 0.6s ease;
   }
 
-  /* When Stage 2 opens, keep Stage 1 still readable */
-  .shell.stage2 .card{
+  /* When Stage 2/3 opens, keep Stage 1 still readable */
+  .shell.stage2 .card,
+  .shell.stage3 .card{
     width: 600px;
     align-self: flex-start;
   }
@@ -158,7 +168,7 @@
     box-shadow: 0 0 0 5px rgba(30, 91, 184, 0.12);
   }
 
-  /* Days counter (smaller + stable) */
+  /* Counter */
   .counter{
     width: 150px;
     height: 40px;
@@ -188,6 +198,34 @@
     background:#fff;
   }
 
+  /* Mini headings for Adults/Kids */
+  .groupBlock{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    min-width:150px;
+  }
+  .groupMiniLabel{
+    font-size:13px;
+    font-weight:900;
+    color:#7a8a9a;
+    padding-left:6px;
+  }
+
+  /* Group size pill (Stage 3 summary) */
+  .groupPill{
+    display:inline-flex;
+    align-items:center;
+    height:50px;
+    padding:0 16px;
+    border-radius:999px;
+    border:1px solid var(--stroke);
+    background:#fff;
+    font-weight:900;
+    color:#0b1220;
+    width: fit-content;
+  }
+
   /* Continue */
   .cta{
     height:54px;
@@ -206,10 +244,11 @@
   .cta:hover{ filter: brightness(1.03); }
   .cta:active{ transform: translateY(1px); }
 
-  /* Hide Continue when Stage 2 is open */
-  .shell.stage2 #continueBtn{ display:none; }
+  /* Hide Continue when Stage 2 or 3 is open */
+  .shell.stage2 #continueBtn,
+  .shell.stage3 #continueBtn{ display:none; }
 
-  /* Stage 2: truly hidden until Continue */
+  /* Stage 2 */
   .stage2-panel{
     flex: 0 0 auto;
     display: none;
@@ -225,6 +264,8 @@
     pointer-events: auto;
     width: 420px;
   }
+  /* Hide stage2 panel on stage3 */
+  .shell.stage3 .stage2-panel{ display:none; }
 
   .panelCard{
     border-radius:26px;
@@ -281,7 +322,7 @@
     border-color: rgba(30,91,184,.55);
   }
 
-  /* Actions: only Next, aligned right */
+  /* Actions */
   .panelActions{
     margin-top:18px;
     display:flex;
@@ -304,12 +345,82 @@
     min-width: 160px;
   }
 
+  /* Stage 3 */
+  .stage3-panel{
+    flex:0 0 auto;
+    display:none;
+    opacity:0;
+    transform:translateX(18px);
+    pointer-events:none;
+    transition:opacity .35s ease, transform .6s ease;
+  }
+  .shell.stage3 .stage3-panel{
+    display:block;
+    opacity:1;
+    transform:translateX(0);
+    pointer-events:auto;
+    width:420px;
+  }
+
+  .constraint{ margin-bottom:16px; }
+  .constraintLabel{
+    font-weight:900;
+    color:var(--brandA);
+    margin-bottom:8px;
+  }
+  .seg{ display:flex; gap:8px; }
+  .seg button{
+    flex:1;
+    padding:10px 0;
+    border-radius:999px;
+    border:1px solid var(--stroke);
+    background:#fff;
+    font-weight:900;
+    cursor:pointer;
+  }
+  .seg button.on{
+    background:rgba(207,239,255,.95);
+    border-color:rgba(30,91,184,.55);
+  }
+
+  /* Stage 3 left-card: show summary like the image */
+  .groupRowSummary{ display:none; }
+  .prefSummaryWrap{ display:none; margin-top: 14px; }
+
+  .shell.stage3 .groupRowEdit{ display:none; }
+  .shell.stage3 .groupRowSummary{ display:grid; }
+  .shell.stage3 .prefSummaryWrap{ display:block; }
+
+  .prefSummaryTitle{
+    font-size:14px;
+    font-weight:900;
+    color:var(--brandA);
+    margin: 4px 0 10px;
+  }
+
+  .prefSummary{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+  }
+
+  /* summary chips: keep the look but not clickable */
+  .prefSummary .chip{
+    cursor:default;
+    pointer-events:none;
+  }
+  .prefSummary .chip:hover{
+    background:#fff;
+    transform:none;
+  }
+
   @media (max-width: 860px){
-    .shell.stage2{ flex-direction: column; align-items: center; }
-    .shell.stage2 .card{ width: 100%; }
-    .shell.stage2 .stage2-panel{ width: 100%; }
+    .shell.stage2, .shell.stage3{ flex-direction: column; align-items: center; }
+    .shell.stage2 .card, .shell.stage3 .card{ width: 100%; }
+    .shell.stage2 .stage2-panel, .shell.stage3 .stage3-panel{ width: 100%; }
     .row{ grid-template-columns: 1fr; }
     .counter{ width: 100%; }
+    .groupBlock{ min-width: 0; }
   }
 </style>
 </head>
@@ -317,7 +428,7 @@
 <body>
   <div class="shell" id="shell">
 
-    <!-- Stage 1 -->
+    <!-- Left card (Trip overview / inputs) -->
     <div class="card">
       <div class="header">
         <div class="logoBox">
@@ -332,12 +443,12 @@
       <div class="inner">
         <div class="row">
           <div class="label">Start</div>
-          <input id="start" placeholder="e.g., dallas, tx" value="dallas, tx">
+          <input id="start" placeholder="e.g., dallas, tx">
         </div>
 
         <div class="row">
           <div class="label">Destination</div>
-          <input id="dest" placeholder="e.g., austin, tx" value="austin, tx">
+          <input id="dest" placeholder="e.g., austin, tx">
         </div>
 
         <div class="row">
@@ -357,12 +468,48 @@
           </div>
         </div>
 
-        <!-- Stage 2 opens ONLY on click -->
+        <!-- Group size (edit in Stage 1/2) -->
+        <div class="row groupRowEdit">
+          <div class="label">Group size</div>
+
+          <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
+            <div class="groupBlock">
+              <div class="groupMiniLabel">Adults</div>
+              <div class="counter" aria-label="Adults">
+                <button type="button" id="adultsMinus">−</button>
+                <div class="mid" id="adultsCount">1</div>
+                <button type="button" id="adultsPlus">+</button>
+              </div>
+            </div>
+
+            <div class="groupBlock">
+              <div class="groupMiniLabel">Kids</div>
+              <div class="counter" aria-label="Kids">
+                <button type="button" id="kidsMinus">−</button>
+                <div class="mid" id="kidsCount">0</div>
+                <button type="button" id="kidsPlus">+</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Group size (summary pill in Stage 3) -->
+        <div class="row groupRowSummary">
+          <div class="label">Group size</div>
+          <div class="groupPill" id="groupPill">Adults 1, Kids 0</div>
+        </div>
+
+        <!-- Selected preferences summary (Stage 3 only) -->
+        <div class="prefSummaryWrap" id="prefSummaryWrap">
+          <div class="prefSummaryTitle">Selected preferences</div>
+          <div class="prefSummary" id="selectedPrefs"></div>
+        </div>
+
         <button class="cta" id="continueBtn" type="button">Continue →</button>
       </div>
     </div>
 
-    <!-- Stage 2 -->
+    <!-- Stage 2: Preferences -->
     <div class="stage2-panel" id="stage2Panel" aria-hidden="true">
       <div class="panelCard">
         <div class="panelTitle">Preferences</div>
@@ -374,17 +521,84 @@
           <div class="chip" data-key="hidden"><span class="chipMain">Hidden gems</span> <span class="chipSub">(offbeat)</span></div>
           <div class="chip" data-key="food"><span class="chipMain">Food</span> <span class="chipSub">(must-try/cafes)</span></div>
           <div class="chip" data-key="nature"><span class="chipMain">Nature</span> <span class="chipSub">(lakes/waterfalls/deserts)</span></div>
-
-          <!-- FIXED: Photography spots consistent formatting -->
           <div class="chip" data-key="photo"><span class="chipMain">Photography spots</span></div>
-
           <div class="chip" data-key="nightlife"><span class="chipMain">Nightlife / events</span></div>
           <div class="chip" data-key="relax"><span class="chipMain">Relax</span> <span class="chipSub">(spas/beaches)</span></div>
         </div>
 
         <div class="panelActions">
-          <!-- Back removed -->
           <button class="panelNext" id="nextBtn" type="button">Next →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stage 3: Constraints -->
+    <div class="stage3-panel" id="stage3Panel" aria-hidden="true">
+      <div class="panelCard">
+        <div class="panelTitle">Constraints</div>
+
+        <div class="constraint">
+          <div class="constraintLabel">Budget</div>
+          <div class="seg" data-key="budget">
+            <button data-val="low">LOW</button>
+            <button data-val="mid" class="on">MID</button>
+            <button data-val="high">HIGH</button>
+          </div>
+        </div>
+
+        <div class="constraint">
+          <div class="constraintLabel">Fitness level (for hikes)</div>
+          <div class="seg" data-key="fitness">
+            <button data-val="easy" class="on">EASY</button>
+            <button data-val="moderate">MODERATE</button>
+            <button data-val="hard">HARD</button>
+          </div>
+        </div>
+
+        <div class="constraint">
+          <div class="constraintLabel">Food preference</div>
+          <div class="seg" data-key="foodPref">
+            <button data-val="halal">HALAL</button>
+            <button data-val="veg" class="on">VEG</button>
+            <button data-val="nonveg">NON-VEG</button>
+          </div>
+        </div>
+
+        <div class="constraint">
+          <div class="constraintLabel">Alcohol</div>
+          <div class="seg" data-key="alcohol">
+            <button data-val="no" class="on">NO</button>
+            <button data-val="yes">YES</button>
+          </div>
+        </div>
+
+        <div class="constraint">
+          <div class="constraintLabel">Tolls</div>
+          <div class="seg" data-key="tolls">
+            <button data-val="avoid" class="on">AVOID</button>
+            <button data-val="add">ADD</button>
+          </div>
+        </div>
+
+        <div class="constraint">
+          <div class="constraintLabel">Adventure level</div>
+          <div class="seg" data-key="adventureLevel">
+            <button data-val="chill">CHILL</button>
+            <button data-val="balanced" class="on">BALANCED</button>
+            <button data-val="extreme">EXTREME</button>
+          </div>
+        </div>
+
+        <div class="constraint">
+          <div class="constraintLabel">Pet friendly</div>
+          <div class="seg" data-key="petFriendly">
+            <button data-val="yes">YES</button>
+            <button data-val="no" class="on">NO</button>
+          </div>
+        </div>
+
+        <div class="panelActions">
+          <button class="panelNext" id="buildBtn" type="button">Build itinerary →</button>
         </div>
       </div>
     </div>
@@ -392,7 +606,7 @@
   </div>
 
 <script>
-  // Days
+  // --- Days ---
   const daysEl = document.getElementById("days");
   document.getElementById("minus").onclick = () => {
     daysEl.textContent = Math.max(1, +daysEl.textContent - 1);
@@ -401,23 +615,45 @@
     daysEl.textContent = Math.min(30, +daysEl.textContent + 1);
   };
 
-  // Chip toggles (click on chip or inside spans)
+  // --- Group size ---
+  const adultsEl = document.getElementById("adultsCount");
+  const kidsEl = document.getElementById("kidsCount");
+
+  document.getElementById("adultsMinus").onclick = () => {
+    adultsEl.textContent = Math.max(1, +adultsEl.textContent - 1);
+  };
+  document.getElementById("adultsPlus").onclick = () => {
+    adultsEl.textContent = Math.min(20, +adultsEl.textContent + 1);
+  };
+
+  document.getElementById("kidsMinus").onclick = () => {
+    kidsEl.textContent = Math.max(0, +kidsEl.textContent - 1);
+  };
+  document.getElementById("kidsPlus").onclick = () => {
+    kidsEl.textContent = Math.min(20, +kidsEl.textContent + 1);
+  };
+
+  // --- Chip toggles (Stage 2 only) ---
   document.getElementById("chips").addEventListener("click", (e) => {
     const chip = e.target.closest(".chip");
     if (!chip) return;
     chip.classList.toggle("on");
   });
 
-  // Stage control: Stage 2 opens ONLY when Continue is clicked
+  // --- Stage control ---
   const shell = document.getElementById("shell");
   const stage2Panel = document.getElementById("stage2Panel");
+  const stage3Panel = document.getElementById("stage3Panel");
   const startEl = document.getElementById("start");
   const destEl  = document.getElementById("dest");
 
-  // Always start on Stage 1 (prevents auto-opening Stage 2 after refresh)
+  // Always start Stage 1
   shell.classList.remove("stage2");
+  shell.classList.remove("stage3");
   stage2Panel.setAttribute("aria-hidden", "true");
+  stage3Panel.setAttribute("aria-hidden", "true");
 
+  // Stage 1 -> Stage 2
   document.getElementById("continueBtn").addEventListener("click", () => {
     const start = startEl.value.trim();
     const dest = destEl.value.trim();
@@ -434,10 +670,62 @@
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
 
-  // Next placeholder
+  // Stage 2 -> Stage 3 (populate Stage 3 summary like the image)
   document.getElementById("nextBtn").addEventListener("click", () => {
-    const selected = Array.from(document.querySelectorAll(".chip.on")).map(c => c.dataset.key);
-    alert("Selected: " + (selected.length ? selected.join(", ") : "None"));
+    // group pill
+    const groupPill = document.getElementById("groupPill");
+    groupPill.textContent = `Adults ${+adultsEl.textContent}, Kids ${+kidsEl.textContent}`;
+
+    // selected preference chips summary
+    const selectedPrefsEl = document.getElementById("selectedPrefs");
+    selectedPrefsEl.innerHTML = "";
+
+    const selected = Array.from(document.querySelectorAll("#chips .chip.on"));
+    selected.forEach(chip => {
+      const clone = chip.cloneNode(true);
+      clone.classList.add("on"); // keep selected look
+      selectedPrefsEl.appendChild(clone);
+    });
+
+    shell.classList.remove("stage2");
+    shell.classList.add("stage3");
+    stage2Panel.setAttribute("aria-hidden", "true");
+    stage3Panel.setAttribute("aria-hidden", "false");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  // Segmented switch behavior (Stage 3 constraints)
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest(".seg button");
+    if (!btn) return;
+
+    const seg = btn.parentElement;
+    seg.querySelectorAll("button").forEach(b => b.classList.remove("on"));
+    btn.classList.add("on");
+  });
+
+  // Build itinerary placeholder (collect everything)
+  document.getElementById("buildBtn").addEventListener("click", () => {
+    const preferences = Array.from(document.querySelectorAll(".chip.on")).map(c => c.dataset.key);
+
+    const constraints = {};
+    document.querySelectorAll(".seg").forEach(seg => {
+      const key = seg.dataset.key;
+      const active = seg.querySelector("button.on");
+      constraints[key] = active ? active.dataset.val : null;
+    });
+
+    const payload = {
+      start: startEl.value.trim(),
+      destination: destEl.value.trim(),
+      mode: document.getElementById("mode").value,
+      days: +daysEl.textContent,
+      group: { adults: +adultsEl.textContent, kids: +kidsEl.textContent },
+      preferences,
+      constraints
+    };
+
+    alert("Collected:\n" + JSON.stringify(payload, null, 2));
   });
 </script>
 
