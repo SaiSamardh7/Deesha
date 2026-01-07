@@ -29,7 +29,7 @@
     background: radial-gradient(1200px 700px at 50% 35%, rgba(210,240,255,0.95), #f6fbff 60%, #f6fbff);
   }
 
-  /* Outer container: Stage 1 centered */
+  /* Outer container */
   .shell{
     width: min(980px, 95vw);
     padding: clamp(20px, 3.4vw, 36px);
@@ -44,23 +44,13 @@
 
     height: auto;
     min-height: unset;
-
     overflow: visible;
 
     transition: width 0.6s ease, padding 0.6s ease, box-shadow 0.6s ease, background 0.6s ease;
   }
 
-  /* Stage 2 layout */
-  .shell.stage2{
-    width: min(1280px, 96vw);
-    display:flex;
-    align-items:flex-start;
-    justify-content:center;
-    gap: 28px;
-    padding: clamp(16px, 2.6vw, 24px);
-  }
-
-  /* Stage 3 layout */
+  /* Stage 2/3 layout */
+  .shell.stage2,
   .shell.stage3{
     width: min(1280px, 96vw);
     display:flex;
@@ -70,7 +60,7 @@
     padding: clamp(16px, 2.6vw, 24px);
   }
 
-  /* Stage 1 card */
+  /* Left card */
   .card{
     width: 640px;
     flex: 0 0 auto;
@@ -82,7 +72,6 @@
     transition: width 0.6s ease, transform 0.6s ease;
   }
 
-  /* When Stage 2/3 opens, keep Stage 1 still readable */
   .shell.stage2 .card,
   .shell.stage3 .card{
     width: 600px;
@@ -248,7 +237,7 @@
   .shell.stage2 #continueBtn,
   .shell.stage3 #continueBtn{ display:none; }
 
-  /* Stage 2 */
+  /* Stage 2 panel */
   .stage2-panel{
     flex: 0 0 auto;
     display: none;
@@ -264,9 +253,9 @@
     pointer-events: auto;
     width: 420px;
   }
-  /* Hide stage2 panel on stage3 */
   .shell.stage3 .stage2-panel{ display:none; }
 
+  /* Right panel card */
   .panelCard{
     border-radius:26px;
     background:rgba(255,255,255,.92);
@@ -345,7 +334,7 @@
     min-width: 160px;
   }
 
-  /* Stage 3 */
+  /* Stage 3 panel */
   .stage3-panel{
     flex:0 0 auto;
     display:none;
@@ -383,7 +372,7 @@
     border-color:rgba(30,91,184,.55);
   }
 
-  /* Stage 3 left-card: show summary like the image */
+  /* Stage 3 left-card: group pill + selected preferences */
   .groupRowSummary{ display:none; }
   .prefSummaryWrap{ display:none; margin-top: 14px; }
 
@@ -391,17 +380,61 @@
   .shell.stage3 .groupRowSummary{ display:grid; }
   .shell.stage3 .prefSummaryWrap{ display:block; }
 
+  /* Selected preferences (Stage 3) — compact + expandable */
+  .prefSummaryHeader{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin: 4px 0 10px;
+  }
+
   .prefSummaryTitle{
     font-size:14px;
     font-weight:900;
     color:var(--brandA);
-    margin: 4px 0 10px;
+    margin:0;
   }
 
+  .prefToggle{
+    border:1px solid var(--stroke);
+    background:#fff;
+    color:var(--brandA);
+    font-weight:900;
+    border-radius:999px;
+    padding:8px 12px;
+    cursor:pointer;
+    font-size:13px;
+    line-height:1;
+  }
+  .prefToggle:hover{
+    background: rgba(207,239,255,.55);
+  }
+
+  /* Collapsed: show up to ~2 lines */
   .prefSummary{
     display:flex;
     flex-wrap:wrap;
     gap:12px;
+    max-height: 104px;
+    overflow:hidden;
+  }
+
+  /* Expanded: scrollable area to keep card stable */
+  .prefSummary.expanded{
+    max-height: 220px;
+    overflow:auto;
+    padding-right: 6px;
+  }
+
+  .prefSummary.expanded::-webkit-scrollbar{ width: 8px; }
+  .prefSummary.expanded::-webkit-scrollbar-thumb{
+    background: rgba(185,205,230,.9);
+    border-radius: 999px;
+  }
+  .prefSummary.expanded::-webkit-scrollbar-track{
+    background: rgba(207,239,255,.35);
+    border-radius: 999px;
   }
 
   /* summary chips: keep the look but not clickable */
@@ -428,7 +461,7 @@
 <body>
   <div class="shell" id="shell">
 
-    <!-- Left card (Trip overview / inputs) -->
+    <!-- Left card -->
     <div class="card">
       <div class="header">
         <div class="logoBox">
@@ -501,7 +534,10 @@
 
         <!-- Selected preferences summary (Stage 3 only) -->
         <div class="prefSummaryWrap" id="prefSummaryWrap">
-          <div class="prefSummaryTitle">Selected preferences</div>
+          <div class="prefSummaryHeader">
+            <div class="prefSummaryTitle">Selected preferences</div>
+            <button type="button" class="prefToggle" id="prefToggle" aria-expanded="false">Show all</button>
+          </div>
           <div class="prefSummary" id="selectedPrefs"></div>
         </div>
 
@@ -633,7 +669,7 @@
     kidsEl.textContent = Math.min(20, +kidsEl.textContent + 1);
   };
 
-  // --- Chip toggles (Stage 2 only) ---
+  // --- Chip toggles (Stage 2) ---
   document.getElementById("chips").addEventListener("click", (e) => {
     const chip = e.target.closest(".chip");
     if (!chip) return;
@@ -670,7 +706,7 @@
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
 
-  // Stage 2 -> Stage 3 (populate Stage 3 summary like the image)
+  // Stage 2 -> Stage 3 (populate Stage 3 summary, compact + expandable)
   document.getElementById("nextBtn").addEventListener("click", () => {
     // group pill
     const groupPill = document.getElementById("groupPill");
@@ -687,11 +723,28 @@
       selectedPrefsEl.appendChild(clone);
     });
 
+    // reset preferences summary to collapsed each time
+    const prefToggle = document.getElementById("prefToggle");
+    selectedPrefsEl.classList.remove("expanded");
+    prefToggle.textContent = "Show all";
+    prefToggle.setAttribute("aria-expanded", "false");
+    prefToggle.style.display = (selected.length > 6) ? "inline-flex" : "none";
+
+    // go to stage3
     shell.classList.remove("stage2");
     shell.classList.add("stage3");
     stage2Panel.setAttribute("aria-hidden", "true");
     stage3Panel.setAttribute("aria-hidden", "false");
     window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  // Stage 3 preferences: expand/collapse
+  document.getElementById("prefToggle").addEventListener("click", () => {
+    const list = document.getElementById("selectedPrefs");
+    const toggle = document.getElementById("prefToggle");
+    const expanded = list.classList.toggle("expanded");
+    toggle.textContent = expanded ? "Show less" : "Show all";
+    toggle.setAttribute("aria-expanded", expanded ? "true" : "false");
   });
 
   // Segmented switch behavior (Stage 3 constraints)
