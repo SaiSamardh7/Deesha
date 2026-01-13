@@ -49,9 +49,10 @@
     transition: width 0.6s ease, padding 0.6s ease, box-shadow 0.6s ease, background 0.6s ease;
   }
 
-  /* Stage 2/3 layout */
+  /* Stage 2/3/4 layout */
   .shell.stage2,
-  .shell.stage3{
+  .shell.stage3,
+  .shell.stage4{
     width: min(1280px, 96vw);
     display:flex;
     align-items:flex-start;
@@ -77,6 +78,9 @@
     width: 600px;
     align-self: flex-start;
   }
+
+  /* In Stage 4, hide the whole left card (we go full map + itinerary) */
+  .shell.stage4 .card{ display:none; }
 
   .header{
     display:flex;
@@ -447,6 +451,256 @@
     transform:none;
   }
 
+  /* ------------------ Stage 4 (MAP + ITINERARY) ------------------ */
+  .stage4-panel{
+    flex: 1 1 auto;
+    display:none;
+    opacity:0;
+    transform:translateY(10px);
+    pointer-events:none;
+    transition:opacity .35s ease, transform .6s ease;
+    width: 100%;
+  }
+  .shell.stage4 .stage4-panel{
+    display:block;
+    opacity:1;
+    transform:translateY(0);
+    pointer-events:auto;
+  }
+  /* Stage 4:x push branding (logo + name) down */
+.shell.stage4 .stage4Top{ 
+  margin-top: 60px;
+}
+.shell.stage4 .itineraryCard{
+  margin-top: -60px; /* try -10 to -40 */
+}
+
+/* Stage 4: keep map close to branding */
+.shell.stage4 .mapCard{
+  margin-top: 2px;
+}
+
+  .shell.stage4 .stage2-panel,
+  .shell.stage4 .stage3-panel{ display:none; }
+
+  .stage4Top{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom: 14px;
+    padding: 6px 4px;
+  }
+  
+  .stage4Brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .stage4Brand .brand{ font-size:30px; }
+  .stage4Brand .stage{ margin:60px; }
+
+  .stage4Grid{
+    display:grid;
+    grid-template-columns: 1fr 420px;
+    gap: 8px;
+    align-items:start;
+    width: 100%;
+  }
+
+  .mapCard{
+    border-radius:26px;
+    background:rgba(255,255,255,0.92);
+    border:1px solid rgba(190,215,240,.75);
+    box-shadow:var(--cardShadow);
+    padding:18px;
+    min-height: 640px;
+  }
+  /* Stage 4: push the map box down (keep header/logo at top, right panel unchanged) */
+.shell.stage4 .mapCard{ margin-top: 2px; }
+
+  .mapMock{
+    height: 100%;
+    min-height: 604px;
+    border-radius: 22px;
+    border:1px solid rgba(190,215,240,.75);
+    background:
+      radial-gradient(900px 500px at 30% 30%, rgba(207,239,255,.75), rgba(255,255,255,.35)),
+      linear-gradient(180deg, rgba(240,250,255,.95), rgba(255,255,255,.75));
+    position: relative;
+    overflow:hidden;
+  }
+
+  .mapMockTopBar{
+    position:absolute;
+    top:100px;
+    left:14px;
+    right:14px;
+    display:flex;
+    gap:10px;
+    align-items:center;
+    justify-content:space-between;
+    pointer-events:none;
+  }
+
+  .mapPill{
+    pointer-events:none;
+    display:inline-flex;
+    gap:10px;
+    align-items:center;
+    padding:10px 14px;
+    border-radius: 999px;
+    border:1px solid rgba(190,215,240,.85);
+    background: rgba(255,255,255,.88);
+    box-shadow: 0 10px 18px rgba(0,0,0,.08);
+    font-weight:900;
+    color: var(--brandA);
+    font-size: 13px;
+  }
+
+  .routeLine{
+    position:absolute;
+    inset: 0;
+    opacity: .9;
+  }
+
+  .mapLegend{
+    position:absolute;
+    bottom:14px;
+    left:14px;
+    display:flex;
+    gap:10px;
+    align-items:center;
+  }
+
+  .legendDot{
+    width:30px;height:30px;
+    border-radius: 999px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:900;
+    color:#fff;
+    box-shadow: 0 10px 18px rgba(0,0,0,.14);
+  }
+
+  .legendA{ background: var(--brandA); }
+  .legendB{ background: #f59e0b; }
+  .legendC{ background: #22c55e; }
+
+  .itineraryCard{
+    border-radius:26px;
+    background:rgba(255,255,255,0.92);
+    border:1px solid rgba(190,215,240,.75);
+    box-shadow:var(--cardShadow);
+    padding:26px;
+  }
+
+  .itinTitle{
+    font-size:22px;
+    font-weight:900;
+    color:var(--brandA);
+    margin:0 0 14px;
+  }
+
+  .itinList{ display:flex; flex-direction:column; gap:12px; }
+
+  .stopRow{
+    border-radius:18px;
+    border:1px solid rgba(190,215,240,.75);
+    background:#fff;
+    padding:12px 14px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+
+  .stopLeft{ display:flex; align-items:center; gap:12px; min-width:0; }
+
+  .stopBadge{
+    width:34px;height:34px;
+    border-radius:999px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:900;
+    color:#fff;
+    flex: 0 0 auto;
+  }
+
+  .badgeA{ background: var(--brandA); }
+  .badgeB{ background: #f59e0b; }
+  .badgeC{ background: #22c55e; }
+
+  .stopText{
+    font-weight:900;
+    color:#0b1220;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .stopActions{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    color: rgba(11,18,32,.55);
+    font-weight:900;
+  }
+
+  .timeRow{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color: rgba(11,18,32,.65);
+    font-weight:800;
+    padding-left: 46px;
+  }
+
+  .constraintsMini{
+    margin-top: 16px;
+    border-top:1px solid rgba(190,215,240,.75);
+    padding-top: 14px;
+  }
+
+  .constraintsMiniTitle{
+    font-weight:900;
+    color: var(--brandA);
+    margin: 0 0 10px;
+  }
+
+  .miniRow{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:7px 0;
+    font-weight:800;
+    color: rgba(11,18,32,.78);
+  }
+
+  .miniVal{ font-weight:900; color: rgba(11,18,32,.9); }
+
+  .optBtn{
+    margin-top: 16px;
+    width: 100%;
+    height: 54px;
+    border-radius: 18px;
+    border:0;
+    font-size:18px;
+    font-weight:900;
+    color:#fff;
+    cursor:pointer;
+    background:linear-gradient(135deg,var(--brandA),var(--brandB));
+    box-shadow:0 14px 22px rgba(18,63,140,.22);
+  }
+  .optBtn:hover{ filter: brightness(1.03); }
+
+  @media (max-width: 1100px){
+    .stage4Grid{ grid-template-columns: 1fr; }
+    .mapCard{ min-height: 460px; }
+    .mapMock{ min-height: 420px; }
+  }
+
   @media (max-width: 860px){
     .shell.stage2, .shell.stage3{ flex-direction: column; align-items: center; }
     .shell.stage2 .card, .shell.stage3 .card{ width: 100%; }
@@ -465,6 +719,7 @@
     <div class="card">
       <div class="header">
         <div class="logoBox">
+          <!-- FIX: repo has logo.png -->
           <img src="assets/logo.jpg" alt="Deesha logo">
         </div>
         <div>
@@ -476,12 +731,12 @@
       <div class="inner">
         <div class="row">
           <div class="label">Start</div>
-          <input id="start" placeholder="e.g., dallas, tx">
+          <input id="start" placeholder="e.g., dallas, tx" value="Dallas">
         </div>
 
         <div class="row">
           <div class="label">Destination</div>
-          <input id="dest" placeholder="e.g., austin, tx">
+          <input id="dest" placeholder="e.g., austin, tx" value="austin">
         </div>
 
         <div class="row">
@@ -639,7 +894,102 @@
       </div>
     </div>
 
+    <!-- Stage 4: Map + Itinerary -->
+    <div class="stage4-panel" id="stage4Panel" aria-hidden="true">
+      <div style="width:100%;">
+        <div class="stage4Top">
+          <div class="stage4Brand">
+            <div class="logoBox" style="width:42px;height:42px;">
+              <img src="assets/logo.jpg" alt="Deesha logo">
+            </div>
+            <div>
+              <div class="brand">Deesha</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stage4Grid">
+          <!-- MAP (75% area) -->
+          <div class="mapCard">
+            <div class="mapMock" id="mapMock" aria-label="Map preview">
+              <div class="mapMockTopBar">
+                <div class="mapPill" id="mapPillText">Route preview</div>
+                <div class="mapPill">Edit stops in itinerary →</div>
+              </div>
+
+              <svg class="routeLine" viewBox="0 0 1000 700" preserveAspectRatio="none" aria-hidden="true">
+                <path d="M 230 170 C 340 230, 390 280, 480 360 S 650 520, 760 560" fill="none" stroke="rgba(18,63,140,.9)" stroke-width="10" stroke-linecap="round"/>
+                <path d="M 230 170 C 340 230, 390 280, 480 360 S 650 520, 760 560" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="4" stroke-linecap="round"/>
+              </svg>
+
+              <div class="mapLegend">
+                <div class="legendDot legendA">A</div>
+                <div class="legendDot legendB">B</div>
+                <div class="legendDot legendC">C</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ITINERARY PANEL -->
+          <div class="itineraryCard">
+            <div class="itinTitle">Itinerary</div>
+
+            <div class="itinList">
+              <div class="stopRow">
+                <div class="stopLeft">
+                  <div class="stopBadge badgeA">A</div>
+                  <div class="stopText" id="itinA">Start</div>
+                </div>
+                <div class="stopActions">≡</div>
+              </div>
+
+              <div class="timeRow" id="timeAB">🚗 1 hr 35 min</div>
+
+              <div class="stopRow" id="stopBRow">
+                <div class="stopLeft">
+                  <div class="stopBadge badgeB">B</div>
+                  <div style="min-width:0;">
+                    <div class="stopText" id="itinB">Stop (optional)</div>
+                    <div style="display:flex; gap:10px; align-items:center; margin-top:6px; color: rgba(11,18,32,.65); font-weight:800;">
+                      ⏱ <span id="stayB">1 hr</span> <span id="stayBLabel">at a spot</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="stopActions">🗑</div>
+              </div>
+
+              <div class="timeRow" id="timeBC">🚗 1 hr 25 min</div>
+
+              <div class="stopRow">
+                <div class="stopLeft">
+                  <div class="stopBadge badgeC">C</div>
+                  <div class="stopText" id="itinC">Destination</div>
+                </div>
+                <div class="stopActions">≡</div>
+              </div>
+            </div>
+
+            <div class="constraintsMini">
+              <div class="constraintsMiniTitle">Constraints</div>
+              <div class="miniRow"><span>Budget</span><span class="miniVal" id="cBudget">MID</span></div>
+              <div class="miniRow"><span>Fitness level</span><span class="miniVal" id="cFitness">MODERATE</span></div>
+              <div class="miniRow"><span>Food preference</span><span class="miniVal" id="cFood">VEG</span></div>
+              <div class="miniRow"><span>Alcohol</span><span class="miniVal" id="cAlcohol">NO</span></div>
+              <div class="miniRow"><span>Tolls</span><span class="miniVal" id="cTolls">AVOID</span></div>
+              <div class="miniRow"><span>Adventure</span><span class="miniVal" id="cAdventure">BALANCED</span></div>
+              <div class="miniRow"><span>Pet friendly</span><span class="miniVal" id="cPet">NO</span></div>
+            </div>
+
+            <button class="optBtn" id="optimizeBtn" type="button">Optimize Trip →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
+
+  <!-- load palette.js -->
+  <script src="assets/palette.js"></script>
 
 <script>
   // --- Days ---
@@ -680,16 +1030,63 @@
   const shell = document.getElementById("shell");
   const stage2Panel = document.getElementById("stage2Panel");
   const stage3Panel = document.getElementById("stage3Panel");
+  const stage4Panel = document.getElementById("stage4Panel");
   const startEl = document.getElementById("start");
   const destEl  = document.getElementById("dest");
 
   // Always start Stage 1
-  shell.classList.remove("stage2");
-  shell.classList.remove("stage3");
+  shell.classList.remove("stage2","stage3","stage4");
   stage2Panel.setAttribute("aria-hidden", "true");
   stage3Panel.setAttribute("aria-hidden", "true");
+  stage4Panel.setAttribute("aria-hidden", "true");
 
-  // Stage 1 -> Stage 2
+  // ----------------------------
+  // Theme from destination state (palette.js)
+  // ----------------------------
+  const STATE_ABBR = {
+    AL:"Alabama", AK:"Alaska", AZ:"Arizona", AR:"Arkansas", CA:"California", CO:"Colorado", CT:"Connecticut",
+    DE:"Delaware", FL:"Florida", GA:"Georgia", HI:"Hawaii", ID:"Idaho", IL:"Illinois", IN:"Indiana", IA:"Iowa",
+    KS:"Kansas", KY:"Kentucky", LA:"Louisiana", ME:"Maine", MD:"Maryland", MA:"Massachusetts", MI:"Michigan",
+    MN:"Minnesota", MS:"Mississippi", MO:"Missouri", MT:"Montana", NE:"Nebraska", NV:"Nevada", NH:"New Hampshire",
+    NJ:"New Jersey", NM:"New Mexico", NY:"New York", NC:"North Carolina", ND:"North Dakota", OH:"Ohio", OK:"Oklahoma",
+    OR:"Oregon", PA:"Pennsylvania", RI:"Rhode Island", SC:"South Carolina", SD:"South Dakota", TN:"Tennessee",
+    TX:"Texas", UT:"Utah", VT:"Vermont", VA:"Virginia", WA:"Washington", WV:"West Virginia", WI:"Wisconsin", WY:"Wyoming"
+  };
+
+  function normalizeStateFromLocation(input) {
+    const raw = (input || "").trim();
+    if (!raw) return null;
+
+    const parts = raw.split(",").map(s => s.trim()).filter(Boolean);
+    const last = (parts[parts.length - 1] || "").trim();
+    if (!last) return null;
+
+    const abbr = last.toUpperCase();
+    if (STATE_ABBR[abbr]) return STATE_ABBR[abbr];
+
+    try {
+      const keys = (typeof STATE_THEMES !== "undefined" && STATE_THEMES) ? Object.keys(STATE_THEMES) : [];
+      const match = keys.find(k => k.toLowerCase() === last.toLowerCase());
+      return match || null;
+    } catch {
+      return null;
+    }
+  }
+
+  function updateThemeFromDestination() {
+    const stateName = normalizeStateFromLocation(destEl.value);
+    if (stateName && typeof applyStateTheme === "function") {
+      applyStateTheme(stateName);
+    }
+  }
+
+  // Live destination typing (debounced)
+  destEl.addEventListener("input", () => {
+    clearTimeout(window.__themeT);
+    window.__themeT = setTimeout(updateThemeFromDestination, 200);
+  });
+
+  // --- Stage 1 -> Stage 2 ---
   document.getElementById("continueBtn").addEventListener("click", () => {
     const start = startEl.value.trim();
     const dest = destEl.value.trim();
@@ -701,36 +1098,34 @@
       return;
     }
 
+    updateThemeFromDestination();
+
     shell.classList.add("stage2");
     stage2Panel.setAttribute("aria-hidden", "false");
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
 
-  // Stage 2 -> Stage 3 (populate Stage 3 summary, compact + expandable)
+  // --- Stage 2 -> Stage 3 ---
   document.getElementById("nextBtn").addEventListener("click", () => {
-    // group pill
-    const groupPill = document.getElementById("groupPill");
-    groupPill.textContent = `Adults ${+adultsEl.textContent}, Kids ${+kidsEl.textContent}`;
+    updateThemeFromDestination();
 
-    // selected preference chips summary
+    // group pill
+    document.getElementById("groupPill").textContent =
+      `Adults ${+adultsEl.textContent}, Kids ${+kidsEl.textContent}`;
+
+    // selected preferences summary
     const selectedPrefsEl = document.getElementById("selectedPrefs");
     selectedPrefsEl.innerHTML = "";
-
     const selected = Array.from(document.querySelectorAll("#chips .chip.on"));
-    selected.forEach(chip => {
-      const clone = chip.cloneNode(true);
-      clone.classList.add("on"); // keep selected look
-      selectedPrefsEl.appendChild(clone);
-    });
+    selected.forEach(chip => selectedPrefsEl.appendChild(chip.cloneNode(true)));
 
-    // reset preferences summary to collapsed each time
+    // collapse prefs list by default
     const prefToggle = document.getElementById("prefToggle");
     selectedPrefsEl.classList.remove("expanded");
     prefToggle.textContent = "Show all";
     prefToggle.setAttribute("aria-expanded", "false");
     prefToggle.style.display = (selected.length > 6) ? "inline-flex" : "none";
 
-    // go to stage3
     shell.classList.remove("stage2");
     shell.classList.add("stage3");
     stage2Panel.setAttribute("aria-hidden", "true");
@@ -757,9 +1152,9 @@
     btn.classList.add("on");
   });
 
-  // Build itinerary placeholder (collect everything)
+  // --- Stage 3 -> Stage 4 (Build itinerary) ---
   document.getElementById("buildBtn").addEventListener("click", () => {
-    const preferences = Array.from(document.querySelectorAll(".chip.on")).map(c => c.dataset.key);
+    const preferences = Array.from(document.querySelectorAll("#chips .chip.on")).map(c => c.dataset.key);
 
     const constraints = {};
     document.querySelectorAll(".seg").forEach(seg => {
@@ -778,8 +1173,53 @@
       constraints
     };
 
-    alert("Collected:\n" + JSON.stringify(payload, null, 2));
+    // Fill itinerary
+    const startText = payload.start || "Start";
+    const destText  = payload.destination || "Destination";
+    document.getElementById("itinA").textContent = startText;
+    document.getElementById("itinC").textContent = destText;
+
+    // B stop label (placeholder logic)
+    const bLabel =
+      preferences.includes("nature") ? "Nature Stop" :
+      preferences.includes("hidden") ? "Hidden Gem Stop" :
+      preferences.includes("food") ? "Food Stop" :
+      "Stop (optional)";
+
+    document.getElementById("itinB").textContent = bLabel;
+
+    // Map pill
+    document.getElementById("mapPillText").textContent = `${startText} → ${destText}`;
+
+    // Constraints mini summary
+    const up = (v) => (v ? String(v).toUpperCase() : "—");
+    document.getElementById("cBudget").textContent    = up(constraints.budget);
+    document.getElementById("cFitness").textContent   = up(constraints.fitness);
+    document.getElementById("cFood").textContent      = up(constraints.foodPref);
+    document.getElementById("cAlcohol").textContent   = up(constraints.alcohol);
+    document.getElementById("cTolls").textContent     = up(constraints.tolls);
+    document.getElementById("cAdventure").textContent = up(constraints.adventureLevel);
+    document.getElementById("cPet").textContent       = up(constraints.petFriendly);
+
+    // Switch to Stage 4
+    shell.classList.remove("stage2","stage3");
+    shell.classList.add("stage4");
+    stage2Panel.setAttribute("aria-hidden", "true");
+    stage3Panel.setAttribute("aria-hidden", "true");
+    stage4Panel.setAttribute("aria-hidden", "false");
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
+    console.log("Stage 4 payload:", payload);
   });
+
+  // Stage 4 button placeholder
+  document.getElementById("optimizeBtn").addEventListener("click", () => {
+    alert("Optimize Trip → coming next (real route + stop suggestions)");
+  });
+
+  // Apply theme on load if destination already includes state
+  updateThemeFromDestination();
 </script>
 
 </body>
