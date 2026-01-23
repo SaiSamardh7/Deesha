@@ -161,6 +161,40 @@
     box-shadow: 0 0 0 5px rgba(30, 91, 184, 0.12);
   }
 
+/* Autocomplete dropdown */
+.acWrap{ position:relative; width:100%; }
+.acList{
+  position:absolute;
+  top: calc(50px + 8px);
+  left:0; right:0;
+  z-index: 50;
+  background:#fff;
+  border:1px solid rgba(185,205,230,.9);
+  border-radius:16px;
+  box-shadow: 0 18px 34px rgba(0,0,0,.10);
+  overflow:hidden;
+  display:none;
+  max-height: 260px;
+  overflow:auto;
+}
+.acList.show{ display:block; }
+.acItem{
+  padding:12px 14px;
+  cursor:pointer;
+  font-weight:800;
+  color:#0b1220;
+  border-bottom:1px solid rgba(185,205,230,.45);
+}
+.acItem:last-child{ border-bottom:0; }
+.acItem:hover{ background: rgba(207,239,255,.55); }
+.acHint{
+  margin-top:6px;
+  font-size:12px;
+  font-weight:800;
+  color: rgba(11,18,32,.55);
+  padding-left: 6px;
+}
+
   /* Counter */
   .counter{
     width: 150px;
@@ -541,6 +575,17 @@
     justify-content:space-between;
     pointer-events:none;
   }
+  /* Real Google Map layer inside Stage 4 */
+    #mapCanvas{
+      position:absolute;
+      inset:0;
+      border-radius: 22px;
+      overflow:hidden;
+      z-index: 1;
+    }
+    .mapMockTopBar{ z-index: 3; }
+    .mapLegend{ z-index: 3; }
+    #mockRouteLine{ z-index: 2; position:absolute; inset:0; }
 
   .mapPill{
     pointer-events:none;
@@ -731,12 +776,20 @@
       <div class="inner">
         <div class="row">
           <div class="label">Start</div>
-          <input id="start" placeholder="e.g., dallas, tx" value="Dallas">
+          <div class="acWrap">
+            <input id="start" placeholder="e.g., dallas, tx" value="Dallas" autocomplete="off">
+            <div class="acList" id="startAcList" role="listbox" aria-label="Start suggestions"></div>
+            <div class="acHint" id="startHint">Pick a suggestion for best results</div>
+          </div>
         </div>
 
         <div class="row">
           <div class="label">Destination</div>
-          <input id="dest" placeholder="e.g., austin, tx" value="austin">
+          <div class="acWrap">
+            <input id="dest" placeholder="e.g., austin, tx" value="austin" autocomplete="off">
+            <div class="acList" id="destAcList" role="listbox" aria-label="Destination suggestions"></div>
+            <div class="acHint" id="destHint">Pick a suggestion for best results</div>
+          </div>
         </div>
 
         <div class="row">
@@ -917,7 +970,10 @@
                 <div class="mapPill">Edit stops in itinerary →</div>
               </div>
 
-              <svg class="routeLine" viewBox="0 0 1000 700" preserveAspectRatio="none" aria-hidden="true">
+              <div id="mapCanvas" aria-hidden="false"></div>
+
+              <!-- Fallback mock route (hidden when Google Map is ready) -->
+              <svg class="routeLine" id="mockRouteLine" viewBox="0 0 1000 700" preserveAspectRatio="none" aria-hidden="true">
                 <path d="M 230 170 C 340 230, 390 280, 480 360 S 650 520, 760 560" fill="none" stroke="rgba(18,63,140,.9)" stroke-width="10" stroke-linecap="round"/>
                 <path d="M 230 170 C 340 230, 390 280, 480 360 S 650 520, 760 560" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="4" stroke-linecap="round"/>
               </svg>
@@ -955,7 +1011,10 @@
                     </div>
                   </div>
                 </div>
-                <div class="stopActions">🗑</div>
+                <div class="stopActions">
+                  <button type="button" id="replaceB" title="Replace stop" style="border:0;background:transparent;cursor:pointer;font-size:16px;">🔁</button>
+                  <button type="button" id="deleteB" title="Remove stop" style="border:0;background:transparent;cursor:pointer;font-size:16px;">🗑</button>
+                </div>
               </div>
 
               <div class="timeRow" id="timeBC">🚗 1 hr 25 min</div>
@@ -990,6 +1049,9 @@
 
   <!-- load palette.js -->
   <script src="assets/palette.js"></script>
+  <script async defer
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB7B9a5IMfFeaWfIksdUskfoX7TbMJBbVk&libraries=geometry&callback=onGoogleMapsLoaded">
+</script>
 
 <script>
   // --- Days ---
@@ -1033,6 +1095,488 @@
   const stage4Panel = document.getElementById("stage4Panel");
   const startEl = document.getElementById("start");
   const destEl  = document.getElementById("dest");
+
+  // --- Stage 4: Google Map state ---
+let gMap = null;
+let gPolyline = null;
+let gMarkers = [];
+
+// --- Stage 4: Optional middle stop (B) coords ---
+let stopBLat = null;
+let stopBLng = null;
+let stopBPlaceId = null;
+
+function clearMapOverlays(){
+  if (gPolyline){ gPolyline.setMap(null); gPolyline = null; }
+  gMarkers.forEach(m => { try{ m.setMap(null); }catch(_){ } });
+  gMarkers = [];
+}
+
+function ensureMapReady(){
+  const canvas = document.getElementById("mapCanvas");
+  const mock = document.getElementById("mockRouteLine");
+
+  if (!window.google || !google.maps || !canvas) {
+    if (mock) mock.style.display = "block";
+    return false;
+  }
+
+  if (!gMap){
+    gMap = new google.maps.Map(canvas, {
+      center: { lat: 39.5, lng: -98.35 },
+      zoom: 4,
+      mapTypeControl: false,
+      streetViewControl: false,
+      fullscreenControl: false,
+    });
+  }
+
+  if (mock) mock.style.display = "none";
+  return true;
+}
+
+window.onGoogleMapsLoaded = function () {
+  // Create the map as soon as Google Maps finishes loading
+  ensureMapReady();
+
+  // If Stage 4 is already open, try drawing the route now
+  if (shell.classList.contains("stage4")) {
+    updateStage4Route();
+  }
+};
+
+// Decode encoded polyline (Google encoded polyline algorithm)
+function decodePolyline(encoded){
+  let index = 0, lat = 0, lng = 0;
+  const coordinates = [];
+
+  while (index < encoded.length){
+    let b, shift = 0, result = 0;
+    do {
+      b = encoded.charCodeAt(index++) - 63;
+      result |= (b & 0x1f) << shift;
+      shift += 5;
+    } while (b >= 0x20);
+    const dlat = ((result & 1) ? ~(result >> 1) : (result >> 1));
+    lat += dlat;
+
+    shift = 0;
+    result = 0;
+    do {
+      b = encoded.charCodeAt(index++) - 63;
+      result |= (b & 0x1f) << shift;
+      shift += 5;
+    } while (b >= 0x20);
+    const dlng = ((result & 1) ? ~(result >> 1) : (result >> 1));
+    lng += dlng;
+
+    coordinates.push({ lat: lat / 1e5, lng: lng / 1e5 });
+  }
+
+  return coordinates;
+}
+
+async function fetchRouteFromBackend(payload){
+  const res = await fetch("http://127.0.0.1:8000/routes", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok){
+    const txt = await res.text();
+    throw new Error(txt || `HTTP ${res.status}`);
+  }
+  return await res.json();
+}
+
+function renderRouteOnMap(route){
+  if (!ensureMapReady()) return;
+  clearMapOverlays();
+
+  const path = route?.polyline ? decodePolyline(route.polyline) : null;
+  if (!path || path.length < 2){
+    console.warn("No polyline to draw:", route);
+    return;
+  }
+
+  gPolyline = new google.maps.Polyline({
+    path,
+    geodesic: true,
+    strokeOpacity: 0.9,
+    strokeWeight: 6,
+    map: gMap,
+  });
+
+  const a = path[0];
+  const c = path[path.length - 1];
+  gMarkers.push(new google.maps.Marker({ position: a, map: gMap, label: "A" }));
+  gMarkers.push(new google.maps.Marker({ position: c, map: gMap, label: "C" }));
+
+  if (stopBLat != null && stopBLng != null) {
+    const bPos = { lat: stopBLat, lng: stopBLng };
+    gMarkers.push(new google.maps.Marker({ position: bPos, map: gMap, label: "B" }));
+  }
+
+  const bounds = new google.maps.LatLngBounds();
+  path.forEach(p => bounds.extend(p));
+
+  // Include B in the viewport if present
+  if (stopBLat != null && stopBLng != null) {
+    bounds.extend({ lat: stopBLat, lng: stopBLng });
+  }
+
+  gMap.fitBounds(bounds);
+}
+
+async function updateStage4Route(){
+  if (startLat == null || startLng == null || destinationLat == null || destinationLng == null){
+    console.warn("Missing lat/lng for route", { startLat, startLng, destinationLat, destinationLng });
+    return;
+  }
+
+  const payload = {
+    start: { lat: startLat, lng: startLng, place_id: startPlaceId || null },
+    destination: { lat: destinationLat, lng: destinationLng, place_id: destinationPlaceId || null },
+  };
+
+  // If the user has a middle stop (B), send it as a waypoint so backend can route A -> B -> C
+  if (stopBLat != null && stopBLng != null) {
+    payload.waypoints = [
+      { lat: stopBLat, lng: stopBLng, place_id: stopBPlaceId || null }
+    ];
+  }
+
+  try{
+    const route = await fetchRouteFromBackend(payload);
+    renderRouteOnMap(route);
+
+    const dur = route.duration_text || route.duration || null;
+    const dist = route.distance_text || route.distance || null;
+
+    const pill = document.getElementById("mapPillText");
+    if (pill){
+      pill.textContent = dist && dur ? `${dist} • ${dur}` : (dur || "Route preview");
+    }
+
+    const timeAB = document.getElementById("timeAB");
+    const timeBC = document.getElementById("timeBC");
+    if (timeAB && dur) timeAB.textContent = `🚗 ${dur}`;
+    if (timeBC) timeBC.style.display = "none";
+  }catch(e){
+    console.warn("/routes not ready yet:", e);
+    const mock = document.getElementById("mockRouteLine");
+    if (mock) mock.style.display = "block";
+  }
+}
+
+  // --- Autocomplete state ---
+const startAcList = document.getElementById("startAcList");
+const destAcList  = document.getElementById("destAcList");
+
+let startSelected = null; // { description, place_id, types }
+let destSelected  = null; // { description, place_id, types }
+
+function showList(listEl, items, onPick){
+  listEl.innerHTML = "";
+  if (!items || items.length === 0){
+    listEl.classList.remove("show");
+    return;
+  }
+  items.slice(0, 8).forEach((p) => {
+    const div = document.createElement("div");
+    div.className = "acItem";
+    div.textContent = p.description || "";
+    div.addEventListener("mousedown", (e) => {
+      e.preventDefault(); // so blur doesn't kill click
+      onPick(p);
+    });
+    listEl.appendChild(div);
+  });
+  listEl.classList.add("show");
+}
+
+function hideList(listEl){
+  listEl.classList.remove("show");
+}
+
+async function fetchAutocomplete(query){
+  // We want "recommendations" without using the Google Places JS Autocomplete widget.
+  // So we call our backend and render the custom dropdown.
+
+  // 1) Try GET with `input=` (current)
+  const getUrl1 = `http://127.0.0.1:8000/places/autocomplete?input=${encodeURIComponent(query)}&components=country:us`;
+  try{
+    const res = await fetch(getUrl1, { method: "GET" });
+    if (res.ok) return await res.json();
+    const txt = await res.text().catch(() => "");
+    console.warn("Autocomplete GET (input=) failed", res.status, txt);
+  }catch(e){
+    console.warn("Autocomplete GET (input=) network error:", e);
+  }
+
+  // 2) Try GET with `text=` (some backends name it this way)
+  const getUrl2 = `http://127.0.0.1:8000/places/autocomplete?text=${encodeURIComponent(query)}&components=country:us`;
+  try{
+    const res = await fetch(getUrl2, { method: "GET" });
+    if (res.ok) return await res.json();
+    const txt = await res.text().catch(() => "");
+    console.warn("Autocomplete GET (text=) failed", res.status, txt);
+  }catch(e){
+    console.warn("Autocomplete GET (text=) network error:", e);
+  }
+
+  // 3) Try POST (send BOTH `input` and `text` for maximum compatibility)
+  try{
+    const res = await fetch("http://127.0.0.1:8000/places/autocomplete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ input: query, text: query, components: "country:us" })
+    });
+    if (res.ok) return await res.json();
+    const txt = await res.text().catch(() => "");
+    console.warn("Autocomplete POST failed", res.status, txt);
+  }catch(e){
+    console.warn("Autocomplete POST network error:", e);
+  }
+
+  // 4) Last resort: fall back to /places/resolve and convert to a single-item "predictions" array.
+  // This gives *some* recommendation behavior even if autocomplete endpoint is missing.
+  try{
+    const res = await fetch("http://127.0.0.1:8000/places/resolve", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: query })
+    });
+    if (!res.ok){
+      const txt = await res.text().catch(() => "");
+      throw new Error(`Resolve fallback failed ${res.status}: ${txt}`);
+    }
+    const data = await res.json();
+    const place = data.place || {};
+    if (place.place_id){
+      return {
+        predictions: [{
+          description: place.formatted_address || place.name || query,
+          place_id: place.place_id
+        }]
+      };
+    }
+  }catch(e){
+    console.warn("Autocomplete fallback via /places/resolve failed:", e);
+  }
+
+  // Nothing worked
+  return { predictions: [] };
+}
+
+async function fetchDetails(placeId){
+  const getUrl = `http://127.0.0.1:8000/places/details?place_id=${encodeURIComponent(placeId)}`;
+  try{
+    const res = await fetch(getUrl, { method: "GET" });
+    if (res.ok) return await res.json();
+
+    let errTxt = "";
+    try{ errTxt = await res.text(); }catch(_){ }
+    console.warn("Details GET failed", res.status, errTxt);
+  }catch(e){
+    console.warn("Details GET network error:", e);
+  }
+
+  const postUrl = "http://127.0.0.1:8000/places/details";
+  const res2 = await fetch(postUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ place_id: placeId })
+  });
+  if (!res2.ok){
+    const txt = await res2.text().catch(() => "");
+    throw new Error(`Details failed. ${res2.status}. ${txt}`);
+  }
+  return await res2.json();
+}
+
+function wireAutocomplete(inputEl, listEl, onPicked){
+  let t = null;
+
+  inputEl.addEventListener("input", () => {
+    clearTimeout(t);
+    const q = inputEl.value.trim();
+
+    // typing invalidates previous selection
+    onPicked(null, true);
+
+    if (q.length < 2){
+      hideList(listEl);
+      return;
+    }
+
+    t = setTimeout(async () => {
+      try{
+        const data = await fetchAutocomplete(q);
+        // Debug: inspect the raw payload that feeds the suggestions
+        // console.log("AC payload:", data);
+        showList(listEl, data.predictions || [], (pred) => {
+          inputEl.value = pred.description || inputEl.value;
+          hideList(listEl);
+          onPicked(pred, false);
+        });
+      }catch(e){
+        hideList(listEl);
+        console.warn("Autocomplete error:", e);
+        // Optional: show a quick hint so you know it's a backend/cors issue
+        const hintId = (inputEl.id === "start") ? "startHint" : (inputEl.id === "dest") ? "destHint" : null;
+        const hintEl = hintId ? document.getElementById(hintId) : null;
+        if (hintEl){
+          hintEl.textContent = "Autocomplete not available (check backend /places/autocomplete)";
+          setTimeout(() => { hintEl.textContent = "Pick a suggestion for best results"; }, 2500);
+        }
+      }
+    }, 250);
+  });
+
+  inputEl.addEventListener("focus", () => {
+    const q = inputEl.value.trim();
+    if (q.length >= 2) inputEl.dispatchEvent(new Event("input"));
+  });
+
+  inputEl.addEventListener("blur", () => {
+    setTimeout(() => hideList(listEl), 120);
+  });
+}
+
+// Wire autocomplete for Start & Destination (Stage 1)
+wireAutocomplete(startEl, startAcList, async (pred, typed) => {
+  if (typed) {
+    startSelected = null;
+    startPlaceId = startLat = startLng = null;
+    return;
+  }
+  startSelected = pred;
+  startPlaceId = pred?.place_id || null;
+  startLat = startLng = null;
+
+  if (startPlaceId){
+    try{
+      const d = await fetchDetails(startPlaceId);
+      startLat = (typeof d.lat === "number") ? d.lat : null;
+      startLng = (typeof d.lng === "number") ? d.lng : null;
+    }catch(e){
+      console.warn("Start details error:", e);
+    }
+  }
+});
+
+wireAutocomplete(destEl, destAcList, async (pred, typed) => {
+  if (typed) {
+    destSelected = null;
+    destinationPlaceId = destinationLat = destinationLng = null;
+    return;
+  }
+  destSelected = pred;
+  destinationPlaceId = pred?.place_id || null;
+  destinationLat = destinationLng = null;
+
+  if (destinationPlaceId){
+    try{
+      const d = await fetchDetails(destinationPlaceId);
+      destinationLat = (typeof d.lat === "number") ? d.lat : null;
+      destinationLng = (typeof d.lng === "number") ? d.lng : null;
+    }catch(e){
+      console.warn("Destination details error:", e);
+    }
+  }
+
+  // update palette as soon as user picks a destination
+  updateThemeFromDestination();
+});
+
+  // ----------------------------
+  // Google Places (Option A): resolve destination via backend (key stays on server)
+  // ----------------------------
+  let destinationPlaceId = null;
+  let destinationLat = null;
+  let destinationLng = null;
+
+  let startPlaceId = null;
+  let startLat = null;
+  let startLng = null;
+
+  async function resolveDestinationViaBackend() {
+    const destinationText = destEl.value.trim();
+    if (!destinationText) {
+      alert("Please enter a destination.");
+      destEl.focus();
+      return false;
+    }
+
+    try {
+      const res = await fetch("http://127.0.0.1:8000/places/resolve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: destinationText })
+      });
+
+      if (!res.ok) {
+        let msg = `Places resolve failed (HTTP ${res.status})`;
+        try {
+          const err = await res.json();
+          if (err && err.detail) msg = String(err.detail);
+        } catch (_) {}
+        alert(msg);
+        return false;
+      }
+
+      const data = await res.json();
+      const place = data.place || {};
+      destinationPlaceId = place.place_id || null;
+      destinationLat = (typeof place.lat === "number") ? place.lat : null;
+      destinationLng = (typeof place.lng === "number") ? place.lng : null;
+
+      console.log("✅ Destination resolved via backend:", data);
+      return true;
+    } catch (e) {
+      alert("Backend error while resolving destination: " + (e?.message || e));
+      return false;
+    }
+  }
+
+  async function resolveStartViaBackend() {
+    const startText = startEl.value.trim();
+    if (!startText) {
+      alert("Please enter a start location.");
+      startEl.focus();
+      return false;
+    }
+
+    try {
+      const res = await fetch("http://127.0.0.1:8000/places/resolve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: startText })
+      });
+
+      if (!res.ok) {
+        let msg = `Start resolve failed (HTTP ${res.status})`;
+        try {
+          const err = await res.json();
+          if (err && err.detail) msg = String(err.detail);
+        } catch (_) {}
+        alert(msg);
+        return false;
+      }
+
+      const data = await res.json();
+      const place = data.place || {};
+      startPlaceId = place.place_id || null;
+      startLat = (typeof place.lat === "number") ? place.lat : null;
+      startLng = (typeof place.lng === "number") ? place.lng : null;
+      console.log("✅ Start resolved via backend:", data);
+      return true;
+    } catch (e) {
+      alert("Backend error while resolving start: " + (e?.message || e));
+      return false;
+    }
+  }
 
   // Always start Stage 1
   shell.classList.remove("stage2","stage3","stage4");
@@ -1087,7 +1631,7 @@
   });
 
   // --- Stage 1 -> Stage 2 ---
-  document.getElementById("continueBtn").addEventListener("click", () => {
+  document.getElementById("continueBtn").addEventListener("click", async () => {
     const start = startEl.value.trim();
     const dest = destEl.value.trim();
 
@@ -1098,7 +1642,27 @@
       return;
     }
 
+    // Resolve start + destination with Google Places via backend (Option A)
+    // If the user picked an autocomplete suggestion, we already have place_id (and usually lat/lng).
+    // Only fall back to /places/resolve when missing.
+
+    let okStart = true;
+    if (!startPlaceId || startLat == null || startLng == null) {
+      okStart = await resolveStartViaBackend();
+    }
+    if (!okStart) return;
+
+    let okDest = true;
+    if (!destinationPlaceId || destinationLat == null || destinationLng == null) {
+      okDest = await resolveDestinationViaBackend();
+    }
+    if (!okDest) return;
+
+    console.log("Start:", { startPlaceId, startLat, startLng, startText: startEl.value.trim() });
+    console.log("Destination:", { destinationPlaceId, destinationLat, destinationLng, destText: destEl.value.trim() });
     updateThemeFromDestination();
+    hideList(startAcList);
+    hideList(destAcList);
 
     shell.classList.add("stage2");
     stage2Panel.setAttribute("aria-hidden", "false");
@@ -1153,70 +1717,177 @@
   });
 
   // --- Stage 3 -> Stage 4 (Build itinerary) ---
-  document.getElementById("buildBtn").addEventListener("click", () => {
-    const preferences = Array.from(document.querySelectorAll("#chips .chip.on")).map(c => c.dataset.key);
+document.getElementById("buildBtn").addEventListener("click", async () => {
+  // 1) constraints
+  const constraints = {};
+  document.querySelectorAll(".seg").forEach(seg => {
+    const key = seg.dataset.key;
+    const active = seg.querySelector("button.on");
+    constraints[key] = active ? active.dataset.val : null;
+  });
 
-    const constraints = {};
-    document.querySelectorAll(".seg").forEach(seg => {
-      const key = seg.dataset.key;
-      const active = seg.querySelector("button.on");
-      constraints[key] = active ? active.dataset.val : null;
+  // 2) interests from chips
+  const interests = Array.from(document.querySelectorAll("#chips .chip.on")).map(c => {
+    const k = c.dataset.key;
+    if (k === "photo") return "photography";
+    if (k === "hidden") return "hidden gems";
+    return k;
+  });
+
+  // 3) build backend payload
+  const backendPayload = {
+    start_city: startEl.value.trim(),
+    destination: destEl.value.trim(),
+    destination_state: normalizeStateFromLocation(destEl.value) || "Texas",
+
+    // Start Places (resolved in Stage 1)
+    start_place_id: startPlaceId,
+    start_lat: startLat,
+    start_lng: startLng,
+
+    // Places (resolved in Stage 1)
+    destination_place_id: destinationPlaceId,
+    destination_lat: destinationLat,
+    destination_lng: destinationLng,
+
+    days: +daysEl.textContent,
+    pace: constraints.adventureLevel || "balanced",
+    group: { adults: +adultsEl.textContent, kids: +kidsEl.textContent },
+    interests
+  };
+
+  // 4) call backend (smallest possible)
+  let data;
+  try {
+    const res = await fetch("http://127.0.0.1:8000/plan-trip", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(backendPayload)
     });
 
-    const payload = {
-      start: startEl.value.trim(),
-      destination: destEl.value.trim(),
-      mode: document.getElementById("mode").value,
-      days: +daysEl.textContent,
-      group: { adults: +adultsEl.textContent, kids: +kidsEl.textContent },
-      preferences,
-      constraints
-    };
+    // Only continue if we got 200 OK
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error(txt || `HTTP ${res.status}`);
+    }
 
-    // Fill itinerary
-    const startText = payload.start || "Start";
-    const destText  = payload.destination || "Destination";
-    document.getElementById("itinA").textContent = startText;
-    document.getElementById("itinC").textContent = destText;
+    data = await res.json();
+    console.log("Backend response:", data);
+    alert(data.summary || "Trip planned! Check console for details.");
+  } catch (e) {
+    alert("Backend error: " + e.message);
+    return; // stop here (no stage switching)
+  }
 
-    // B stop label (placeholder logic)
-    const bLabel =
-      preferences.includes("nature") ? "Nature Stop" :
-      preferences.includes("hidden") ? "Hidden Gem Stop" :
-      preferences.includes("food") ? "Food Stop" :
-      "Stop (optional)";
+  // 5) Render Stage 4 using response
+  document.getElementById("itinA").textContent = data.start_city || "Start";
+  document.getElementById("itinC").textContent = data.destination || "Destination";
+  document.getElementById("mapPillText").textContent = `${data.start_city} → ${data.destination}`;
 
-    document.getElementById("itinB").textContent = bLabel;
+  // middle stop (B)
+  document.getElementById("itinB").textContent = data.days?.[0]?.stops?.[1]?.title || "Stop (optional)";
 
-    // Map pill
-    document.getElementById("mapPillText").textContent = `${startText} → ${destText}`;
+  // 🔑 IMPORTANT: resolve B to lat/lng so route can go A → B → C
+const bTitle = data.days?.[0]?.stops?.[1]?.title;
 
-    // Constraints mini summary
-    const up = (v) => (v ? String(v).toUpperCase() : "—");
-    document.getElementById("cBudget").textContent    = up(constraints.budget);
-    document.getElementById("cFitness").textContent   = up(constraints.fitness);
-    document.getElementById("cFood").textContent      = up(constraints.foodPref);
-    document.getElementById("cAlcohol").textContent   = up(constraints.alcohol);
-    document.getElementById("cTolls").textContent     = up(constraints.tolls);
-    document.getElementById("cAdventure").textContent = up(constraints.adventureLevel);
-    document.getElementById("cPet").textContent       = up(constraints.petFriendly);
+if (bTitle) {
+  try {
+    const resB = await fetch("http://127.0.0.1:8000/places/resolve", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: bTitle })
+    });
 
-    // Switch to Stage 4
-    shell.classList.remove("stage2","stage3");
-    shell.classList.add("stage4");
-    stage2Panel.setAttribute("aria-hidden", "true");
-    stage3Panel.setAttribute("aria-hidden", "true");
-    stage4Panel.setAttribute("aria-hidden", "false");
+    if (resB.ok) {
+      const rb = await resB.json();
+      const p = rb.place || {};
+      stopBLat = (typeof p.lat === "number") ? p.lat : null;
+      stopBLng = (typeof p.lng === "number") ? p.lng : null;
+      stopBPlaceId = p.place_id || null;
+    }
+  } catch (e) {
+    console.warn("Failed to resolve B stop:", e);
+  }
+}
 
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  // 6) Constraints mini summary
+  const up = (v) => (v ? String(v).toUpperCase() : "—");
+  document.getElementById("cBudget").textContent    = up(constraints.budget);
+  document.getElementById("cFitness").textContent   = up(constraints.fitness);
+  document.getElementById("cFood").textContent      = up(constraints.foodPref);
+  document.getElementById("cAlcohol").textContent   = up(constraints.alcohol);
+  document.getElementById("cTolls").textContent     = up(constraints.tolls);
+  document.getElementById("cAdventure").textContent = up(constraints.adventureLevel);
+  document.getElementById("cPet").textContent       = up(constraints.petFriendly);
 
-    console.log("Stage 4 payload:", payload);
+  // 7) Finally: move to Stage 4 after success
+  shell.classList.remove("stage2", "stage3");
+  shell.classList.add("stage4");
+  stage2Panel.setAttribute("aria-hidden", "true");
+  stage3Panel.setAttribute("aria-hidden", "true");
+  stage4Panel.setAttribute("aria-hidden", "false");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  updateStage4Route();
+});
+
+
+
+  // --- Stop B actions ---
+const replaceBBtn = document.getElementById("replaceB");
+const deleteBBtn = document.getElementById("deleteB");
+
+if (deleteBBtn){
+  deleteBBtn.addEventListener("click", () => {
+    document.getElementById("itinB").textContent = "Stop (optional)";
+    const timeBC = document.getElementById("timeBC");
+    if (timeBC) timeBC.style.display = "none";
+    stopBLat = stopBLng = null;
+    stopBPlaceId = null;
+    updateStage4Route();
   });
+}
 
-  // Stage 4 button placeholder
-  document.getElementById("optimizeBtn").addEventListener("click", () => {
-    alert("Optimize Trip → coming next (real route + stop suggestions)");
+if (replaceBBtn){
+  replaceBBtn.addEventListener("click", async () => {
+    const interests = Array.from(document.querySelectorAll("#chips .chip.on")).map(c => c.dataset.key);
+
+    try{
+      const res = await fetch("http://127.0.0.1:8000/places/alternatives", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          start: { lat: startLat, lng: startLng, place_id: startPlaceId || null },
+          destination: { lat: destinationLat, lng: destinationLng, place_id: destinationPlaceId || null },
+          interests,
+        })
+      });
+
+      if (!res.ok){
+        const txt = await res.text();
+        throw new Error(txt || `HTTP ${res.status}`);
+      }
+
+      const alt = await res.json();
+      document.getElementById("itinB").textContent = alt.title || alt.name || "New stop";
+      document.getElementById("stayB").textContent = alt.stay || "1 hr";
+
+      stopBLat = (typeof alt.lat === "number") ? alt.lat : null;
+      stopBLng = (typeof alt.lng === "number") ? alt.lng : null;
+      stopBPlaceId = alt.place_id || null;
+
+updateStage4Route(); // redraw route + marker
+    }catch(e){
+      alert("Replace stop not ready yet (backend endpoint missing): " + (e?.message || e));
+    }
   });
+}
+
+// Stage 4 button placeholder
+document.getElementById("optimizeBtn").addEventListener("click", () => {
+  alert("Optimize Trip → coming next (real route + stop suggestions)");
+});
+
+
 
   // Apply theme on load if destination already includes state
   updateThemeFromDestination();
