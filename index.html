@@ -49,9 +49,10 @@
     transition: width 0.6s ease, padding 0.6s ease, box-shadow 0.6s ease, background 0.6s ease;
   }
 
-  /* Stage 2/3/4 layout */
+  /* Stage 2/3/3.5/4 layout */
   .shell.stage2,
   .shell.stage3,
+  .shell.stage35,
   .shell.stage4{
     width: min(1280px, 96vw);
     display:flex;
@@ -74,9 +75,227 @@
   }
 
   .shell.stage2 .card,
-  .shell.stage3 .card{
+  .shell.stage3 .card,
+  .shell.stage35 .card{
     width: 600px;
     align-self: flex-start;
+  }
+
+  /* In Stage 3.5, hide the left card (we use a full-width recommendations layout) */
+  .shell.stage35 .card{ display:none; }
+  /* ------------------ Stage 3.5 (RECOMMENDATIONS) ------------------ */
+  .stage35-panel{
+    flex: 1 1 auto;
+    display:none;
+    opacity:0;
+    transform:translateY(10px);
+    pointer-events:none;
+    transition:opacity .35s ease, transform .6s ease;
+    width: 100%;
+  }
+  .shell.stage35 .stage35-panel{
+    display:block;
+    opacity:1;
+    transform:translateY(0);
+    pointer-events:auto;
+  }
+  .shell.stage35 .stage2-panel,
+  .shell.stage35 .stage3-panel{ display:none; }
+
+  .stage35Top{
+    display:flex;
+    align-items:center;
+    gap:40px;
+    margin-bottom: 0px;
+    padding: 6px 4px;
+  }
+
+  .stage35Grid{
+    display:grid;
+    grid-template-columns: 360px 1fr;
+    gap: 18px;
+    align-items:stretch;
+    width:100%;
+  }
+
+  .moodCard{
+    border-radius:26px;
+    background:rgba(255,255,255,0.92);
+    border:1px solid rgba(190,215,240,.75);
+    box-shadow:var(--cardShadow);
+    padding:24px 22px 26px;
+    position:sticky;
+    top: 10px;
+    display:flex;
+    flex-direction:column;
+  }
+  .moodTitle{
+    font-size:26px;
+    font-weight:900;
+    color:#0b1220;
+    margin:0 0 6px;
+  }
+  .moodSub{
+    font-size:14px;
+    font-weight:800;
+    color: rgba(11,18,32,.62);
+    margin:0 0 14px;
+  }
+  .moodList{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    margin-top: 12px;
+    flex:1 1 auto;
+  }
+  .moodBtn{
+    width:100%;
+    border-radius:18px;
+    border:1px solid rgba(185,205,230,.9);
+    background:#fff;
+    padding:14px 14px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    cursor:pointer;
+    font-weight:900;
+    color:#0b1220;
+    font-size:18px;
+    transition: transform .06s ease, background .15s ease, border-color .15s ease;
+  }
+  .moodBtn:hover{ background: rgba(207,239,255,.55); transform: translateY(-1px); }
+  .moodBtn.on{ background: rgba(207,239,255,.95); border-color: rgba(30,91,184,.55); }
+  .moodIcon{ width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:26px; }
+
+  .scrollFab{
+    margin-top:14px;
+    width:54px;
+    height:54px;
+    border-radius:999px;
+    border:1px solid rgba(185,205,230,.9);
+    background: rgba(255,255,255,.92);
+    box-shadow: 0 14px 22px rgba(18,63,140,.12);
+    cursor:pointer;
+    font-weight:900;
+    color: var(--brandA);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:20px;
+  }
+  .scrollFab:hover{ background: rgba(207,239,255,.75); }
+
+  .recWrap{
+    border-radius:26px;
+    background:rgba(255,255,255,0.92);
+    border:1px solid rgba(190,215,240,.75);
+    box-shadow:var(--cardShadow);
+    padding:22px;
+  }
+
+  .recHeader{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom: 12px;
+  }
+  .recHeader h2{
+    margin:0;
+    font-size:28px;
+    font-weight:900;
+    color:#0b1220;
+  }
+  .recHint{
+    font-size:13px;
+    font-weight:900;
+    color: rgba(11,18,32,.62);
+  }
+
+  .recScroll{
+    max-height: 640px;
+    overflow:auto;
+    padding-right: 6px;
+  }
+  .recScroll::-webkit-scrollbar{ width: 8px; }
+  .recScroll::-webkit-scrollbar-thumb{ background: rgba(185,205,230,.9); border-radius: 999px; }
+  .recScroll::-webkit-scrollbar-track{ background: rgba(207,239,255,.35); border-radius: 999px; }
+
+  .recGrid{
+    display:grid;
+    grid-template-columns: repeat(2, minmax(280px, 1fr));
+    gap:16px;
+  }
+
+  .recCard{
+    border-radius:22px;
+    border:1px solid rgba(185,205,230,.9);
+    background:#fff;
+    padding:14px;
+    box-shadow: 0 12px 20px rgba(0,0,0,.06);
+    overflow:hidden;
+  }
+  .recTop{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+  .recName{ font-weight:900; font-size:18px; margin:0; color:#0b1220; }
+  .recTag{
+    padding:6px 10px;
+    border-radius:999px;
+    border:1px solid rgba(185,205,230,.9);
+    background: rgba(207,239,255,.35);
+    font-weight:900;
+    font-size:13px;
+    color: rgba(11,18,32,.78);
+    white-space:nowrap;
+  }
+  .recImgs{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:12px; }
+  .recImg{
+    height:120px;
+    border-radius:16px;
+    border:1px solid rgba(185,205,230,.6);
+    background:
+      radial-gradient(900px 500px at 30% 30%, rgba(207,239,255,.75), rgba(255,255,255,.35)),
+      linear-gradient(180deg, rgba(240,250,255,.95), rgba(255,255,255,.75));
+  }
+  .recDesc{ margin-top:10px; font-weight:800; color: rgba(11,18,32,.72); }
+  .recMetaRow{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:10px; }
+  .recMeta{ font-weight:900; color: rgba(11,18,32,.72); font-size:13px; }
+  .recBtn{
+    height:40px;
+    padding:0 14px;
+    border-radius:12px;
+    border:0;
+    font-weight:900;
+    color:#fff;
+    cursor:pointer;
+    background:linear-gradient(135deg,var(--brandA),var(--brandB));
+  }
+  .recBtn.added{ background: rgba(34,197,94,.9); }
+
+  .stage35Actions{
+    margin-top:30px;
+    padding-top:4px;
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    align-items:center;
+  }
+  .ghostBtn{
+    height:54px;
+    padding:0 18px;
+    border-radius:18px;
+    border:1px solid var(--stroke);
+    background:#fff;
+    font-size:18px;
+    font-weight:900;
+    color: var(--brandA);
+    cursor:pointer;
+  }
+  .ghostBtn:hover{ background: rgba(207,239,255,.35); }
+
+  @media (max-width: 1100px){
+    .stage35Grid{ grid-template-columns: 1fr; }
+    .moodCard{ position:relative; top:auto; }
+    .recGrid{ grid-template-columns: 1fr; }
   }
 
   /* In Stage 4, hide the whole left card (we go full map + itinerary) */
@@ -501,18 +720,6 @@
     transform:translateY(0);
     pointer-events:auto;
   }
-  /* Stage 4:x push branding (logo + name) down */
-.shell.stage4 .stage4Top{ 
-  margin-top: 60px;
-}
-.shell.stage4 .itineraryCard{
-  margin-top: -60px; /* try -10 to -40 */
-}
-
-/* Stage 4: keep map close to branding */
-.shell.stage4 .mapCard{
-  margin-top: 2px;
-}
 
   .shell.stage4 .stage2-panel,
   .shell.stage4 .stage3-panel{ display:none; }
@@ -547,14 +754,23 @@
     border:1px solid rgba(190,215,240,.75);
     box-shadow:var(--cardShadow);
     padding:18px;
-    min-height: 640px;
+    min-height: 680px;
   }
-  /* Stage 4: push the map box down (keep header/logo at top, right panel unchanged) */
-.shell.stage4 .mapCard{ margin-top: 2px; }
+  .stage4Bottom{
+    margin-top: 0;
+    position: relative;
+    top: 0px; /* pull the Back button further up to reduce the gap */
+    display:flex;
+    justify-content:flex-start;
+  }
+
+  .stage4Bottom .ghostBtn{
+    margin-left: 0;
+  }
 
   .mapMock{
     height: 100%;
-    min-height: 604px;
+    min-height: 650px;
     border-radius: 22px;
     border:1px solid rgba(190,215,240,.75);
     background:
@@ -638,7 +854,23 @@
     border:1px solid rgba(190,215,240,.75);
     box-shadow:var(--cardShadow);
     padding:26px;
+
+    /* Prevent page glitching: keep the right panel height stable and scroll its contents */
+    display:flex;
+    flex-direction:column;
+    height: 680px;          /* fixed height so the card doesn't grow */
+    overflow: hidden;       /* keep scrolling inside .itinScroll */
   }
+
+  .itinScroll{
+    flex: 1 1 auto;
+    min-height: 0;          /* IMPORTANT: enables scrolling inside a flex column */
+    overflow:auto;
+    padding-right: 6px;
+  }
+  .itinScroll::-webkit-scrollbar{ width: 8px; }
+  .itinScroll::-webkit-scrollbar-thumb{ background: rgba(185,205,230,.9); border-radius: 999px; }
+  .itinScroll::-webkit-scrollbar-track{ background: rgba(207,239,255,.35); border-radius: 999px; }
 
   .itinTitle{
     font-size:22px;
@@ -714,6 +946,19 @@
     margin: 0 0 10px;
   }
 
+  .extraStopsWrap{
+    margin-top: 16px;
+    border-top: 1px dashed rgba(190,215,240,.75);
+    padding-top: 10px;
+  }
+
+  .extraStop{
+    padding: 4px 0;
+    font-weight: 800;
+    color: rgba(11,18,32,.78);
+    font-size: 14px;
+  }
+
   .miniRow{
     display:flex;
     justify-content:space-between;
@@ -777,7 +1022,7 @@
         <div class="row">
           <div class="label">Start</div>
           <div class="acWrap">
-            <input id="start" placeholder="e.g., dallas, tx" value="Dallas" autocomplete="off">
+            <input id="start" placeholder="e.g., dallas, tx" value="Dallas, TX" autocomplete="off">
             <div class="acList" id="startAcList" role="listbox" aria-label="Start suggestions"></div>
             <div class="acHint" id="startHint">Pick a suggestion for best results</div>
           </div>
@@ -786,7 +1031,7 @@
         <div class="row">
           <div class="label">Destination</div>
           <div class="acWrap">
-            <input id="dest" placeholder="e.g., austin, tx" value="austin" autocomplete="off">
+            <input id="dest" placeholder="e.g., austin, tx" value="Austin, TX" autocomplete="off">
             <div class="acList" id="destAcList" role="listbox" aria-label="Destination suggestions"></div>
             <div class="acHint" id="destHint">Pick a suggestion for best results</div>
           </div>
@@ -947,16 +1192,91 @@
       </div>
     </div>
 
-    <!-- Stage 4: Map + Itinerary -->
-    <div class="stage4-panel" id="stage4Panel" aria-hidden="true">
+    <!-- Stage 3.5: Mood + Recommendations -->
+    <div class="stage35-panel" id="stage35Panel" aria-hidden="true">
       <div style="width:100%;">
-        <div class="stage4Top">
-          <div class="stage4Brand">
-            <div class="logoBox" style="width:42px;height:42px;">
+        <div class="stage35Top">
+          <div class="header">
+            <div class="logoBox">
               <img src="assets/logo.jpg" alt="Deesha logo">
             </div>
             <div>
               <div class="brand">Deesha</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stage35Grid">
+          <!-- LEFT: Mood selection -->
+          <div class="moodCard">
+            <div class="moodTitle">What are you in the mood for?</div>
+            <div class="moodSub">Pick one to see recommendations</div>
+
+            <div class="moodList" id="moodList">
+              <button type="button" class="moodBtn on" data-mood="hiking">
+                <span class="moodIcon">🥾</span>
+                <span>Hiking &amp; Nature</span>
+              </button>
+              <button type="button" class="moodBtn" data-mood="scenic">
+                <span class="moodIcon">🌄</span>
+                <span>Scenic Views</span>
+              </button>
+              <button type="button" class="moodBtn" data-mood="food">
+                <span class="moodIcon">🍽</span>
+                <span>Food &amp; Cafés</span>
+              </button>
+              <button type="button" class="moodBtn" data-mood="photo">
+                <span class="moodIcon">📸</span>
+                <span>Photography Spots</span>
+              </button>
+              <button type="button" class="moodBtn" data-mood="culture">
+                <span class="moodIcon">🏛</span>
+                <span>Culture &amp; History</span>
+              </button>
+              <button type="button" class="moodBtn" data-mood="adventure">
+                <span class="moodIcon">🛶</span>
+                <span>Adventure / Activities</span>
+              </button>
+              <button type="button" class="moodBtn" data-mood="relax">
+                <span class="moodIcon">😌</span>
+                <span>Relax &amp; Chill</span>
+              </button>
+            </div>
+
+            <div class="stage35Actions">
+              <button type="button" class="ghostBtn" id="backToStage3">Back</button>
+              <button type="button" class="panelNext" id="continueToStage4">Continue →</button>
+            </div>
+          </div>
+
+          <!-- RIGHT: Recommendations -->
+          <div class="recWrap">
+            <div class="recHeader">
+              <h2>Recommended Stops</h2>
+              <div class="recHint" id="recHint">Choose one optional stop to add as B</div>
+            </div>
+
+            <div class="recScroll" id="recScroll">
+              <div class="recGrid" id="recGrid">
+                <!-- cards injected by JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stage 4: Map + Itinerary -->
+    <div class="stage4-panel" id="stage4Panel" aria-hidden="true">
+      <div style="width:100%;">
+          <div class="stage4Top">
+            <div class="stage4Brand">
+              <div class="logoBox" style="width:42px;height:42px;">
+                <img src="assets/logo.jpg" alt="Deesha logo">
+              </div>
+              <div>
+                <div class="brand">Deesha</div>
+              </div>
             </div>
           </div>
         </div>
@@ -990,58 +1310,20 @@
           <div class="itineraryCard">
             <div class="itinTitle">Itinerary</div>
 
-            <div class="itinList">
-              <div class="stopRow">
-                <div class="stopLeft">
-                  <div class="stopBadge badgeA">A</div>
-                  <div class="stopText" id="itinA">Start</div>
-                </div>
-                <div class="stopActions">≡</div>
-              </div>
+            <div class="itinScroll">
+              <div class="itinList" id="itinList"></div>
 
-              <div class="timeRow" id="timeAB">🚗 1 hr 35 min</div>
-
-              <div class="stopRow" id="stopBRow">
-                <div class="stopLeft">
-                  <div class="stopBadge badgeB">B</div>
-                  <div style="min-width:0;">
-                    <div class="stopText" id="itinB">Stop (optional)</div>
-                    <div style="display:flex; gap:10px; align-items:center; margin-top:6px; color: rgba(11,18,32,.65); font-weight:800;">
-                      ⏱ <span id="stayB">1 hr</span> <span id="stayBLabel">at a spot</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="stopActions">
-                  <button type="button" id="replaceB" title="Replace stop" style="border:0;background:transparent;cursor:pointer;font-size:16px;">🔁</button>
-                  <button type="button" id="deleteB" title="Remove stop" style="border:0;background:transparent;cursor:pointer;font-size:16px;">🗑</button>
-                </div>
-              </div>
-
-              <div class="timeRow" id="timeBC">🚗 1 hr 25 min</div>
-
-              <div class="stopRow">
-                <div class="stopLeft">
-                  <div class="stopBadge badgeC">C</div>
-                  <div class="stopText" id="itinC">Destination</div>
-                </div>
-                <div class="stopActions">≡</div>
+              <!-- other selected recommendations (beyond the first B) -->
+              <div id="extraStopsWrap" class="extraStopsWrap" style="display:none;">
+                <div class="constraintsMiniTitle">Other planned stops</div>
+                <div id="extraStopsList"></div>
               </div>
             </div>
-
-            <div class="constraintsMini">
-              <div class="constraintsMiniTitle">Constraints</div>
-              <div class="miniRow"><span>Budget</span><span class="miniVal" id="cBudget">MID</span></div>
-              <div class="miniRow"><span>Fitness level</span><span class="miniVal" id="cFitness">MODERATE</span></div>
-              <div class="miniRow"><span>Food preference</span><span class="miniVal" id="cFood">VEG</span></div>
-              <div class="miniRow"><span>Alcohol</span><span class="miniVal" id="cAlcohol">NO</span></div>
-              <div class="miniRow"><span>Tolls</span><span class="miniVal" id="cTolls">AVOID</span></div>
-              <div class="miniRow"><span>Adventure</span><span class="miniVal" id="cAdventure">BALANCED</span></div>
-              <div class="miniRow"><span>Pet friendly</span><span class="miniVal" id="cPet">NO</span></div>
-            </div>
-
-            <button class="optBtn" id="optimizeBtn" type="button">Optimize Trip →</button>
           </div>
         </div>
+        <div class="stage4Bottom">
+            <button type="button" class="ghostBtn" id="backToStage35From4">← Back</button>
+          </div>
       </div>
     </div>
 
@@ -1093,18 +1375,451 @@
   const stage2Panel = document.getElementById("stage2Panel");
   const stage3Panel = document.getElementById("stage3Panel");
   const stage4Panel = document.getElementById("stage4Panel");
+  const stage35Panel = document.getElementById("stage35Panel");
   const startEl = document.getElementById("start");
   const destEl  = document.getElementById("dest");
+  const API_BASE = "http://127.0.0.1:8000";
+
+  // --- Stage 3.5 state ---
+  let stage35BasePayload = null;     // payload assembled from Stage 3
+  let stage35Constraints = null;
+  let stage35Interests = null;       // chips from Stage 2
+  let selectedRec = null;            // chosen B stop
+  let selectedRecs = [];             // all selected recommendations (multi-select)
+  // Cache the most recent Stage 4 /routes response (includes legs[])
+  let lastStage4Route = null;
+
+  const MOOD_TO_INTERESTS = {
+    hiking: ["hiking", "nature"],
+    scenic: ["scenic views"],
+    food: ["food", "cafes"],
+    photo: ["photography"],
+    culture: ["culture", "history"],
+    adventure: ["adventure"],
+    relax: ["relax"]
+  };
+
+  function esc(s){
+    return String(s || "").replace(/[&<>\"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function openStage35(){
+    shell.classList.remove("stage2", "stage3", "stage4");
+    shell.classList.add("stage35");
+    stage2Panel.setAttribute("aria-hidden", "true");
+    stage3Panel.setAttribute("aria-hidden", "true");
+    stage35Panel.setAttribute("aria-hidden", "false");
+    stage4Panel.setAttribute("aria-hidden", "true");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function openStage4(){
+    shell.classList.remove("stage2", "stage3", "stage35");
+    shell.classList.add("stage4");
+    stage2Panel.setAttribute("aria-hidden", "true");
+    stage3Panel.setAttribute("aria-hidden", "true");
+    stage35Panel.setAttribute("aria-hidden", "true");
+    stage4Panel.setAttribute("aria-hidden", "false");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function setMoodActive(mood){
+    document.querySelectorAll("#moodList .moodBtn").forEach(b => b.classList.toggle("on", b.dataset.mood === mood));
+  }
+
+  async function fetchAlternativeForMood(mood){
+    const interests = MOOD_TO_INTERESTS[mood] || [];
+    const payload = {
+      start: { lat: startLat, lng: startLng, place_id: startPlaceId || null },
+      destination: { lat: destinationLat, lng: destinationLng, place_id: destinationPlaceId || null },
+      interests
+    };
+
+    const res = await fetch(`${API_BASE}/places/alternatives`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok){
+      const txt = await res.text().catch(() => "");
+      throw new Error(txt || `HTTP ${res.status}`);
+    }
+
+    const alt = await res.json();
+    return alt;
+  }
+
+  function renderRecCards(mood, items){
+    const grid = document.getElementById("recGrid");
+    const hint = document.getElementById("recHint");
+    if (!grid) return;
+
+    grid.innerHTML = "";
+    selectedRec = null;
+    selectedRecs = [];
+
+    const tagMap = {
+      hiking: "Hike",
+      scenic: "Scenic",
+      food: "Food",
+      photo: "Photo",
+      culture: "Culture",
+      adventure: "Adventure",
+      relax: "Relax"
+    };
+
+    if (hint) hint.textContent = "Choose one or more optional stops (first added becomes B)";
+
+    items.forEach((it, idx) => {
+      const title = it.title || it.name || `Suggested stop ${idx + 1}`;
+      const detour = it.detour || it.detour_text || "+10 mins detour";
+      const stay = it.stay || it.stay_text || "1 hr stop";
+      const tag = it.tag || tagMap[mood] || "Recommended";
+
+      const card = document.createElement("div");
+      card.className = "recCard";
+      card.innerHTML = `
+        <div class="recTop">
+          <div class="recName">${esc(title)}</div>
+          <div class="recTag">${esc(tag)}</div>
+        </div>
+        <div class="recImgs">
+          <div class="recImg" aria-hidden="true"></div>
+          <div class="recImg" aria-hidden="true"></div>
+        </div>
+        <div class="recDesc">${esc(it.description || "A great stop to match your mood.")}</div>
+        <div class="recMetaRow">
+          <div class="recMeta">⭐ ${esc(stay)} • ${esc(detour)}</div>
+          <button type="button" class="recBtn" data-idx="${idx}">Add stop</button>
+        </div>
+      `;
+
+      const btn = card.querySelector(".recBtn");
+      if (btn){
+        btn.addEventListener("click", () => {
+          const id = it.place_id || it.title || `idx-${idx}`;
+
+          if (btn.classList.contains("added")) {
+            // unselect this card
+            btn.classList.remove("added");
+            btn.textContent = "Add stop";
+            selectedRecs = selectedRecs.filter(r => (r.place_id || r.title || "") !== (it.place_id || it.title || ""));
+          } else {
+            // select this card
+            btn.classList.add("added");
+            btn.textContent = "✓ Added";
+            selectedRecs.push(it);
+          }
+
+          // keep the first selected one as the primary B stop for Stage 4
+          selectedRec = selectedRecs[0] || null;
+        });
+      }
+
+      grid.appendChild(card);
+    });
+  }
+
+  async function loadRecommendations(mood){
+    const grid = document.getElementById("recGrid");
+    const hint = document.getElementById("recHint");
+    if (grid) grid.innerHTML = "";
+
+    // Guard: we need real lat/lng to ask backend for real-time places
+    if (startLat == null || startLng == null || destinationLat == null || destinationLng == null){
+      if (hint) hint.textContent = "Pick Start & Destination from suggestions first (so we have lat/lng). Showing placeholders for now.";
+      const placeholders = [
+        { title: "Oakwood Nature Trail", tag: "Nature", description: "Relaxing stop with easy trails.", stay: "1 hr stop", detour: "+10 mins detour" },
+        { title: "Pine Ridge Clifftop Hike", tag: "Hike", description: "Great views and a photo moment.", stay: "2 hr stop", detour: "+15 mins detour" },
+        { title: "Cedar Falls Trail", tag: "Nature", description: "Scenic stop with water views.", stay: "1.5 hr stop", detour: "+12 mins detour" },
+        { title: "Sunset Hill Lookout", tag: "Hidden Gem", description: "Perfect for a sunset break.", stay: "1 hr stop", detour: "+5 mins detour" }
+      ];
+      renderRecCards(mood, placeholders);
+      return;
+    }
+
+    if (hint) hint.textContent = "Loading real-time recommendations…";
+
+    // Real-time route-aware recommendations from backend
+    try{
+      const res = await fetch(`${API_BASE}/places/things-to-do`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          start: { lat: startLat, lng: startLng, place_id: startPlaceId || null },
+          destination: { lat: destinationLat, lng: destinationLng, place_id: destinationPlaceId || null },
+          mood,
+          limit: 12
+        })
+      });
+
+      if (!res.ok){
+        const txt = await res.text().catch(() => "");
+        if (hint) hint.textContent = `Backend error: ${res.status}`;
+        throw new Error(txt || `HTTP ${res.status}`);
+      }
+
+      const data = await res.json();
+      const items = [
+  ...(data.en_route || []),
+  ...(data.near_destination || [])
+];
+
+      const tagMap = {
+        hiking: "Hike",
+        scenic: "Scenic",
+        food: "Food",
+        photo: "Photo",
+        culture: "Culture",
+        adventure: "Adventure",
+        relax: "Relax"
+      };
+
+      const mapped = items.map(p => ({
+        title: p.title,
+        place_id: p.place_id,
+        lat: p.lat,
+        lng: p.lng,
+        tag: tagMap[mood] || "Recommended",
+        description: p.formatted_address || "",
+        stay: "1 hr stop",
+        detour: "Along your route"
+      }));
+
+      if (hint) hint.textContent = `Showing ${mapped.length} real-time recommendations`;
+      renderRecCards(mood, mapped);
+      return;
+    }catch(e){
+      console.warn("/places/things-to-do failed, using placeholders:", e);
+    }
+
+    // Placeholders (fallback)
+    const placeholders = [
+      { title: "Oakwood Nature Trail", tag: "Nature", description: "Relaxing stop with easy trails.", stay: "1 hr stop", detour: "+10 mins detour" },
+      { title: "Pine Ridge Clifftop Hike", tag: "Hike", description: "Great views and a photo moment.", stay: "2 hr stop", detour: "+15 mins detour" },
+      { title: "Cedar Falls Trail", tag: "Nature", description: "Scenic stop with water views.", stay: "1.5 hr stop", detour: "+12 mins detour" },
+      { title: "Sunset Hill Lookout", tag: "Hidden Gem", description: "Perfect for a sunset break.", stay: "1 hr stop", detour: "+5 mins detour" }
+    ];
+
+    renderRecCards(mood, placeholders);
+  }
+
+  // Scroll button behavior
+  const scrollBtn = document.getElementById("scrollRecs");
+  if (scrollBtn){
+    scrollBtn.addEventListener("click", () => {
+      const sc = document.getElementById("recScroll");
+      if (!sc) return;
+      sc.scrollBy({ top: Math.max(320, sc.clientHeight * 0.75), behavior: "smooth" });
+    });
+  }
+
+  // Mood click wiring
+  const moodList = document.getElementById("moodList");
+  if (moodList){
+    moodList.addEventListener("click", (e) => {
+      const btn = e.target.closest(".moodBtn");
+      if (!btn) return;
+      const mood = btn.dataset.mood;
+      setMoodActive(mood);
+      loadRecommendations(mood);
+    });
+  }
+
+  // Stage 3.5 actions
+  const backToStage3Btn = document.getElementById("backToStage3");
+  if (backToStage3Btn){
+    backToStage3Btn.addEventListener("click", () => {
+      shell.classList.remove("stage2", "stage35", "stage4");
+      shell.classList.add("stage3");
+      stage2Panel.setAttribute("aria-hidden", "true");
+      stage3Panel.setAttribute("aria-hidden", "false");
+      stage35Panel.setAttribute("aria-hidden", "true");
+      stage4Panel.setAttribute("aria-hidden", "true");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  }
+
+  const backToStage35From4 = document.getElementById("backToStage35From4");
+if (backToStage35From4) {
+  backToStage35From4.addEventListener("click", () => {
+    openStage35();
+  });
+}
+
+const continueToStage4Btn = document.getElementById("continueToStage4");
+if (continueToStage4Btn){
+  continueToStage4Btn.addEventListener("click", async () => {
+    // IMPORTANT: If start/dest aren't resolved yet, do NOT allow placeholder routing
+    if (startLat == null || startLng == null || destinationLat == null || destinationLng == null){
+      alert("Please pick Start & Destination from the suggestions first (so we have lat/lng).");
+      return;
+    }
+
+    // Resolve coords for selected stops (if any missing)
+    let midStops = getMidStops();
+    midStops = await ensureStopsHaveCoords(midStops);
+
+    const resolved = midStops.filter(s => typeof s.lat === "number" && typeof s.lng === "number");
+    const dropped  = midStops.filter(s => !(typeof s.lat === "number" && typeof s.lng === "number"));
+
+    // If any selected stops couldn't be resolved, remove them from selection so UI matches map
+    if (dropped.length){
+      alert(
+        "Some selected stops could not be found on Google Maps and were skipped:\n\n- " +
+        dropped.map(s => s.title).join("\n- ")
+      );
+
+      // keep only resolved
+      selectedRecs = (selectedRecs || []).filter(r => {
+        const title = r.title || r.name || "";
+        return resolved.some(s => s.title === title);
+      });
+      selectedRec = selectedRecs[0] || null;
+    }
+
+    // Optional backend save
+    const base = Object.assign({}, stage35BasePayload || {});
+    base.mid_stops = resolved.map(s => ({ title: s.title, lat: s.lat, lng: s.lng }));
+
+    try{
+      await fetch(`${API_BASE}/plan-trip`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(base)
+      });
+    }catch(e){
+      console.warn("/plan-trip call failed:", e);
+    }
+
+    openStage4();
+    renderItinerary();
+    await updateStage4Route();
+    await updateLegTimes();   // ✅ fill the right side “🚗 …” rows
+  });
+}
+
+
+  // ----------------------------
+// Dynamic stops list (A, B, C, D...)
+// ----------------------------
+const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+function stopKey(it){
+  const pid = it?.place_id;
+  const title = (it?.title || it?.name || "").trim().toLowerCase();
+  return pid ? `pid:${pid}` : `t:${title}`;
+}
+
+function getMidStops(){
+  return (selectedRecs || []).map(r => ({
+    title: r.title || r.name || "Stop",
+    place_id: r.place_id || null,
+    lat: (typeof r.lat === "number") ? r.lat : null,
+    lng: (typeof r.lng === "number") ? r.lng : null,
+    stay: r.stay || "1 hr"
+  }));
+}
+
+function getResolvedMidStops(){
+  return getMidStops().filter(s => typeof s.lat === "number" && typeof s.lng === "number");
+}
+
+async function ensureStopsHaveCoords(midStops){
+  for (const s of midStops){
+    if (typeof s.lat === "number" && typeof s.lng === "number") continue;
+    try{
+      const res = await fetch(`${API_BASE}/places/resolve`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: s.title })
+      });
+      if (!res.ok) continue;
+      const data = await res.json();
+      const p = data.place || data || {};
+      if (typeof p.lat === "number" && typeof p.lng === "number"){
+        s.lat = p.lat;
+        s.lng = p.lng;
+        s.place_id = s.place_id || p.place_id || null;
+      }
+    }catch(e){
+      console.warn("resolve stop failed", s.title, e);
+    }
+  }
+  return midStops;
+}
+
+function renderItinerary(){
+  const listEl = document.getElementById("itinList");
+  if (!listEl) return;
+
+  const startTitle = startEl.value.trim() || "Start";
+  const destTitle  = destEl.value.trim()  || "Destination";
+
+  const mids = getMidStops();
+  const stops = [
+    { title: startTitle, fixed: true, kind: "start" },
+    ...mids.map(s => ({ ...s, fixed: false, kind: "mid" })),
+    { title: destTitle, fixed: true, kind: "dest" }
+  ];
+
+  listEl.innerHTML = "";
+
+  stops.forEach((s, idx) => {
+    const letter = LETTERS[idx] || "?";
+    const isStart = (s.kind === "start");
+    const isDest  = (s.kind === "dest");
+    const badgeBg = isStart ? "var(--brandA)" : (isDest ? "#22c55e" : "#f59e0b");
+
+    const row = document.createElement("div");
+    row.className = "stopRow";
+    row.innerHTML = `
+      <div class="stopLeft">
+        <div class="stopBadge" style="background:${badgeBg}">${esc(letter)}</div>
+        <div style="min-width:0;">
+          <div class="stopText">${esc(s.title)}</div>
+          ${(!isStart && !isDest) ? `<div style="margin-top:6px; color: rgba(11,18,32,.65); font-weight:800;">⏱ ${esc(s.stay || "1 hr")}</div>` : ""}
+        </div>
+      </div>
+      <div class="stopActions">
+        <span title="Drag handle">≡</span>
+        ${(!s.fixed) ? `<button type="button" class="delStop" data-k="${esc(stopKey(s))}" style="border:0;background:transparent;cursor:pointer;font-size:16px;">🗑</button>` : ""}
+      </div>
+    `;
+    listEl.appendChild(row);
+
+    if (idx < stops.length - 1){
+  const t = document.createElement("div");
+  t.className = "timeRow";
+  t.setAttribute("data-leg", String(idx));      // <-- important
+  t.textContent = "🚗 calculating…";
+  listEl.appendChild(t);
+}
+  });
+
+  listEl.querySelectorAll(".delStop").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const k = btn.getAttribute("data-k") || "";
+
+      // Remove the stop from the selected recommendations
+      selectedRecs = (selectedRecs || []).filter(r => stopKey(r) !== k);
+      selectedRec = selectedRecs[0] || null;
+
+      // Re-render UI + recompute route
+      renderItinerary();
+      await updateStage4Route();
+      await updateLegTimes();
+    });
+  });
+}
 
   // --- Stage 4: Google Map state ---
 let gMap = null;
 let gPolyline = null;
 let gMarkers = [];
 
-// --- Stage 4: Optional middle stop (B) coords ---
-let stopBLat = null;
-let stopBLng = null;
-let stopBPlaceId = null;
+
 
 function clearMapOverlays(){
   if (gPolyline){ gPolyline.setMap(null); gPolyline = null; }
@@ -1136,15 +1851,15 @@ function ensureMapReady(){
 }
 
 window.onGoogleMapsLoaded = function () {
-  // Create the map as soon as Google Maps finishes loading
   ensureMapReady();
 
-  // If Stage 4 is already open, try drawing the route now
   if (shell.classList.contains("stage4")) {
-    updateStage4Route();
+    (async () => {
+      await updateStage4Route();
+      await updateLegTimes();
+    })();
   }
 };
-
 // Decode encoded polyline (Google encoded polyline algorithm)
 function decodePolyline(encoded){
   let index = 0, lat = 0, lng = 0;
@@ -1176,18 +1891,47 @@ function decodePolyline(encoded){
   return coordinates;
 }
 
-async function fetchRouteFromBackend(payload){
-  const res = await fetch("http://127.0.0.1:8000/routes", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
-  if (!res.ok){
-    const txt = await res.text();
-    throw new Error(txt || `HTTP ${res.status}`);
+async function fetchRouteFromBackend(payload, opts = {}){
+  const timeoutMs = typeof opts.timeoutMs === "number" ? opts.timeoutMs : 15000;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try{
+    const res = await fetch(`${API_BASE}/routes`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      signal: controller.signal
+    });
+
+    if (!res.ok){
+      const txt = await res.text().catch(() => "");
+      throw new Error(txt || `HTTP ${res.status}`);
+    }
+
+    return await res.json();
+  }catch(e){
+    // If backend or Google call hangs, avoid leaving UI stuck on “calculating…”
+    if (e && (e.name === "AbortError" || String(e).includes("AbortError"))){
+      throw new Error("Route request timed out");
+    }
+    throw e;
+  }finally{
+    clearTimeout(timer);
   }
-  return await res.json();
 }
+
+function getRoutePointsForLegs(){
+  const mids = getResolvedMidStops();
+  return [
+    { lat: startLat, lng: startLng, place_id: startPlaceId || null },
+    ...mids.map(s => ({ lat: s.lat, lng: s.lng, place_id: s.place_id || null })),
+    { lat: destinationLat, lng: destinationLng, place_id: destinationPlaceId || null }
+  ];
+}
+
+
+ 
 
 function renderRouteOnMap(route){
   if (!ensureMapReady()) return;
@@ -1208,24 +1952,46 @@ function renderRouteOnMap(route){
   });
 
   const a = path[0];
-  const c = path[path.length - 1];
+  const dest = path[path.length - 1];
   gMarkers.push(new google.maps.Marker({ position: a, map: gMap, label: "A" }));
-  gMarkers.push(new google.maps.Marker({ position: c, map: gMap, label: "C" }));
 
-  if (stopBLat != null && stopBLng != null) {
-    const bPos = { lat: stopBLat, lng: stopBLng };
-    gMarkers.push(new google.maps.Marker({ position: bPos, map: gMap, label: "B" }));
-  }
+  const mids = getResolvedMidStops();
+  mids.forEach((s, i) => {
+    const letter = LETTERS[i + 1] || "?";
+    gMarkers.push(new google.maps.Marker({ position: { lat: s.lat, lng: s.lng }, map: gMap, label: letter }));
+  });
+
+  const destLetter = LETTERS[mids.length + 1] || "?";
+  gMarkers.push(new google.maps.Marker({ position: dest, map: gMap, label: destLetter }));
 
   const bounds = new google.maps.LatLngBounds();
   path.forEach(p => bounds.extend(p));
+  mids.forEach(s => bounds.extend({ lat: s.lat, lng: s.lng }));
+  gMap.fitBounds(bounds);
+}
 
-  // Include B in the viewport if present
-  if (stopBLat != null && stopBLng != null) {
-    bounds.extend({ lat: stopBLat, lng: stopBLng });
+function renderExtraStops(){
+  const wrap = document.getElementById("extraStopsWrap");
+  const list = document.getElementById("extraStopsList");
+  if (!wrap || !list) return;
+
+  const extras = (selectedRecs || []).filter(r => r !== selectedRec);
+  list.innerHTML = "";
+  if (!extras.length){
+    wrap.style.display = "none";
+    return;
   }
 
-  gMap.fitBounds(bounds);
+  extras.forEach((it, idx) => {
+    const title = it.title || it.name || `Stop ${idx + 2}`;
+    const stay = it.stay || "1 hr stop";
+    const div = document.createElement("div");
+    div.className = "extraStop";
+    div.textContent = `${title} • ${stay}`;
+    list.appendChild(div);
+  });
+
+  wrap.style.display = "block";
 }
 
 async function updateStage4Route(){
@@ -1239,15 +2005,15 @@ async function updateStage4Route(){
     destination: { lat: destinationLat, lng: destinationLng, place_id: destinationPlaceId || null },
   };
 
-  // If the user has a middle stop (B), send it as a waypoint so backend can route A -> B -> C
-  if (stopBLat != null && stopBLng != null) {
-    payload.waypoints = [
-      { lat: stopBLat, lng: stopBLng, place_id: stopBPlaceId || null }
-    ];
+  // Multi-stop waypoints (B, C, D...)
+  const mids = getResolvedMidStops();
+  if (mids.length){
+    payload.waypoints = mids.map(s => ({ lat: s.lat, lng: s.lng, place_id: s.place_id || null }));
   }
 
   try{
     const route = await fetchRouteFromBackend(payload);
+    lastStage4Route = route;
     renderRouteOnMap(route);
 
     const dur = route.duration_text || route.duration || null;
@@ -1258,17 +2024,54 @@ async function updateStage4Route(){
       pill.textContent = dist && dur ? `${dist} • ${dur}` : (dur || "Route preview");
     }
 
-    const timeAB = document.getElementById("timeAB");
-    const timeBC = document.getElementById("timeBC");
-    if (timeAB && dur) timeAB.textContent = `🚗 ${dur}`;
-    if (timeBC) timeBC.style.display = "none";
+    renderExtraStops();
+    return route;
+    
+
   }catch(e){
     console.warn("/routes not ready yet:", e);
     const mock = document.getElementById("mockRouteLine");
     if (mock) mock.style.display = "block";
+    return null;
   }
 }
 
+// Use the single Stage 4 /routes response (with legs[]) to fill the right-side times
+async function updateLegTimes(){
+  const listEl = document.getElementById("itinList");
+  if (!listEl) return;
+
+  const rows = Array.from(listEl.querySelectorAll('.timeRow[data-leg]'));
+  if (!rows.length) return;
+
+  const legs = (lastStage4Route && Array.isArray(lastStage4Route.legs)) ? lastStage4Route.legs : [];
+
+  if (!legs.length){
+    // Backend didn't return legs[] (or server wasn't restarted)
+    rows.forEach(r => {
+      if (String(r.textContent || "").includes("calculating")) r.textContent = "🚗 unavailable (no legs data)";
+    });
+    return;
+  }
+
+  rows.forEach((row) => {
+    const idx = Number(row.getAttribute('data-leg'));
+    const leg = Number.isFinite(idx) ? legs[idx] : null;
+
+    if (!leg){
+      row.textContent = "";
+      return;
+    }
+
+    const dist = leg.distance_text || "";
+    const dur  = leg.duration_text || "";
+
+    if (dist && dur) row.textContent = `🚗 ${dist} • ${dur}`;
+    else if (dur) row.textContent = `🚗 ${dur}`;
+    else if (dist) row.textContent = `🚗 ${dist}`;
+    else row.textContent = "🚗 unavailable";
+  });
+}
   // --- Autocomplete state ---
 const startAcList = document.getElementById("startAcList");
 const destAcList  = document.getElementById("destAcList");
@@ -1394,7 +2197,6 @@ async function fetchDetails(placeId){
   }
   return await res2.json();
 }
-
 function wireAutocomplete(inputEl, listEl, onPicked){
   let t = null;
 
@@ -1410,11 +2212,17 @@ function wireAutocomplete(inputEl, listEl, onPicked){
       return;
     }
 
+    const thisQuery = q; // capture query for this run
+
     t = setTimeout(async () => {
       try{
-        const data = await fetchAutocomplete(q);
-        // Debug: inspect the raw payload that feeds the suggestions
-        // console.log("AC payload:", data);
+        const data = await fetchAutocomplete(thisQuery);
+
+        // Ignore stale responses (if user typed something new in the meantime)
+        if (inputEl.value.trim() !== thisQuery) {
+          return;
+        }
+
         showList(listEl, data.predictions || [], (pred) => {
           inputEl.value = pred.description || inputEl.value;
           hideList(listEl);
@@ -1423,7 +2231,6 @@ function wireAutocomplete(inputEl, listEl, onPicked){
       }catch(e){
         hideList(listEl);
         console.warn("Autocomplete error:", e);
-        // Optional: show a quick hint so you know it's a backend/cors issue
         const hintId = (inputEl.id === "start") ? "startHint" : (inputEl.id === "dest") ? "destHint" : null;
         const hintEl = hintId ? document.getElementById(hintId) : null;
         if (hintEl){
@@ -1579,9 +2386,10 @@ wireAutocomplete(destEl, destAcList, async (pred, typed) => {
   }
 
   // Always start Stage 1
-  shell.classList.remove("stage2","stage3","stage4");
+  shell.classList.remove("stage2","stage3","stage4","stage35");
   stage2Panel.setAttribute("aria-hidden", "true");
   stage3Panel.setAttribute("aria-hidden", "true");
+  stage35Panel.setAttribute("aria-hidden", "true");
   stage4Panel.setAttribute("aria-hidden", "true");
 
   // ----------------------------
@@ -1666,6 +2474,7 @@ wireAutocomplete(destEl, destAcList, async (pred, typed) => {
 
     shell.classList.add("stage2");
     stage2Panel.setAttribute("aria-hidden", "false");
+    stage35Panel.setAttribute("aria-hidden", "true");
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
 
@@ -1691,9 +2500,11 @@ wireAutocomplete(destEl, destAcList, async (pred, typed) => {
     prefToggle.style.display = (selected.length > 6) ? "inline-flex" : "none";
 
     shell.classList.remove("stage2");
+    shell.classList.remove("stage35");
     shell.classList.add("stage3");
     stage2Panel.setAttribute("aria-hidden", "true");
     stage3Panel.setAttribute("aria-hidden", "false");
+    stage35Panel.setAttribute("aria-hidden", "true");
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
 
@@ -1716,7 +2527,7 @@ wireAutocomplete(destEl, destAcList, async (pred, typed) => {
     btn.classList.add("on");
   });
 
-  // --- Stage 3 -> Stage 4 (Build itinerary) ---
+// --- Stage 3 -> Stage 3.5 (Build itinerary) ---
 document.getElementById("buildBtn").addEventListener("click", async () => {
   // 1) constraints
   const constraints = {};
@@ -1734,18 +2545,16 @@ document.getElementById("buildBtn").addEventListener("click", async () => {
     return k;
   });
 
-  // 3) build backend payload
+  // 3) build backend payload (saved for Stage 4)
   const backendPayload = {
     start_city: startEl.value.trim(),
     destination: destEl.value.trim(),
     destination_state: normalizeStateFromLocation(destEl.value) || "Texas",
 
-    // Start Places (resolved in Stage 1)
     start_place_id: startPlaceId,
     start_lat: startLat,
     start_lng: startLng,
 
-    // Places (resolved in Stage 1)
     destination_place_id: destinationPlaceId,
     destination_lat: destinationLat,
     destination_lng: destinationLng,
@@ -1756,136 +2565,30 @@ document.getElementById("buildBtn").addEventListener("click", async () => {
     interests
   };
 
-  // 4) call backend (smallest possible)
-  let data;
-  try {
-    const res = await fetch("http://127.0.0.1:8000/plan-trip", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(backendPayload)
-    });
+  stage35BasePayload = backendPayload;
+  stage35Constraints = constraints;
+  stage35Interests = interests;
 
-    // Only continue if we got 200 OK
-    if (!res.ok) {
-      const txt = await res.text();
-      throw new Error(txt || `HTTP ${res.status}`);
-    }
+  // Stage 4 pill (itinerary list is rendered dynamically later)
+  document.getElementById("mapPillText").textContent = `${backendPayload.start_city || "Start"} → ${backendPayload.destination || "Destination"}`;
 
-    data = await res.json();
-    console.log("Backend response:", data);
-    alert(data.summary || "Trip planned! Check console for details.");
-  } catch (e) {
-    alert("Backend error: " + e.message);
-    return; // stop here (no stage switching)
-  }
-
-  // 5) Render Stage 4 using response
-  document.getElementById("itinA").textContent = data.start_city || "Start";
-  document.getElementById("itinC").textContent = data.destination || "Destination";
-  document.getElementById("mapPillText").textContent = `${data.start_city} → ${data.destination}`;
-
-  // middle stop (B)
-  document.getElementById("itinB").textContent = data.days?.[0]?.stops?.[1]?.title || "Stop (optional)";
-
-  // 🔑 IMPORTANT: resolve B to lat/lng so route can go A → B → C
-const bTitle = data.days?.[0]?.stops?.[1]?.title;
-
-if (bTitle) {
-  try {
-    const resB = await fetch("http://127.0.0.1:8000/places/resolve", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: bTitle })
-    });
-
-    if (resB.ok) {
-      const rb = await resB.json();
-      const p = rb.place || {};
-      stopBLat = (typeof p.lat === "number") ? p.lat : null;
-      stopBLng = (typeof p.lng === "number") ? p.lng : null;
-      stopBPlaceId = p.place_id || null;
-    }
-  } catch (e) {
-    console.warn("Failed to resolve B stop:", e);
-  }
-}
-
-  // 6) Constraints mini summary
-  const up = (v) => (v ? String(v).toUpperCase() : "—");
-  document.getElementById("cBudget").textContent    = up(constraints.budget);
-  document.getElementById("cFitness").textContent   = up(constraints.fitness);
-  document.getElementById("cFood").textContent      = up(constraints.foodPref);
-  document.getElementById("cAlcohol").textContent   = up(constraints.alcohol);
-  document.getElementById("cTolls").textContent     = up(constraints.tolls);
-  document.getElementById("cAdventure").textContent = up(constraints.adventureLevel);
-  document.getElementById("cPet").textContent       = up(constraints.petFriendly);
-
-  // 7) Finally: move to Stage 4 after success
-  shell.classList.remove("stage2", "stage3");
-  shell.classList.add("stage4");
-  stage2Panel.setAttribute("aria-hidden", "true");
-  stage3Panel.setAttribute("aria-hidden", "true");
-  stage4Panel.setAttribute("aria-hidden", "false");
-  window.scrollTo({ top: 0, behavior: "smooth" });
-  updateStage4Route();
+  // Open Stage 3.5 and load initial mood recommendations
+  openStage35();
+  setMoodActive("hiking");
+  await loadRecommendations("hiking");
 });
 
 
 
-  // --- Stop B actions ---
-const replaceBBtn = document.getElementById("replaceB");
-const deleteBBtn = document.getElementById("deleteB");
 
-if (deleteBBtn){
-  deleteBBtn.addEventListener("click", () => {
-    document.getElementById("itinB").textContent = "Stop (optional)";
-    const timeBC = document.getElementById("timeBC");
-    if (timeBC) timeBC.style.display = "none";
-    stopBLat = stopBLng = null;
-    stopBPlaceId = null;
-    updateStage4Route();
-  });
-}
 
-if (replaceBBtn){
-  replaceBBtn.addEventListener("click", async () => {
-    const interests = Array.from(document.querySelectorAll("#chips .chip.on")).map(c => c.dataset.key);
-
-    try{
-      const res = await fetch("http://127.0.0.1:8000/places/alternatives", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          start: { lat: startLat, lng: startLng, place_id: startPlaceId || null },
-          destination: { lat: destinationLat, lng: destinationLng, place_id: destinationPlaceId || null },
-          interests,
-        })
-      });
-
-      if (!res.ok){
-        const txt = await res.text();
-        throw new Error(txt || `HTTP ${res.status}`);
-      }
-
-      const alt = await res.json();
-      document.getElementById("itinB").textContent = alt.title || alt.name || "New stop";
-      document.getElementById("stayB").textContent = alt.stay || "1 hr";
-
-      stopBLat = (typeof alt.lat === "number") ? alt.lat : null;
-      stopBLng = (typeof alt.lng === "number") ? alt.lng : null;
-      stopBPlaceId = alt.place_id || null;
-
-updateStage4Route(); // redraw route + marker
-    }catch(e){
-      alert("Replace stop not ready yet (backend endpoint missing): " + (e?.message || e));
-    }
-  });
-}
-
-// Stage 4 button placeholder
-document.getElementById("optimizeBtn").addEventListener("click", () => {
-  alert("Optimize Trip → coming next (real route + stop suggestions)");
-});
+  // Stage 4 button placeholder (only if such a button exists)
+  const optimizeBtn = document.getElementById("optimizeBtn");
+  if (optimizeBtn){
+    optimizeBtn.addEventListener("click", () => {
+      alert("Optimize Trip → coming next (real route + stop suggestions)");
+    });
+  }
 
 
 
