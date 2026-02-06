@@ -1,3 +1,7 @@
+@@ -1,2 +1,40 @@
+# Deesha
+an AI based travel planner
+
 # Deesha — Trip Planner MVP
 
 Deesha is a lightweight trip planning MVP that generates a basic itinerary from user inputs (start city, destination, number of days, group size, and preferences).
@@ -18,7 +22,10 @@ This repo contains:
 
 ---
 
-## Run Backend (macOS)
+## How to Run the Project (Beginner Friendly)
+
+### Run Backend (macOS / Linux)
+
 ```bash
 cd backend
 python3 -m venv .venv
